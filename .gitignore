@@ -1,0 +1,10 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+.dll
+*.o
+*.dll
+R/oud/
+binary/
+.dll
