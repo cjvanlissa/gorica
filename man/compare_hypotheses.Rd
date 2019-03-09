@@ -24,8 +24,16 @@ DETAILS
 }
 \examples{
 \dontrun{
-if(interactive()){
- #EXAMPLE1
- }
+academic_awards <- within(academic_awards, {
+  prog <- factor(prog, levels = 1:3, labels = c("General", "Academic",
+                                                "Vocational") ) } )
+  zmath <- scale(academic_awards$math)
+  #Model fitting
+  model <- glm(num_awards ~ prog + zmath + prog * zmath, family = "poisson",
+               data = academic_awards)
+               new_gor <- gorica(x = model, hypothesis = "zmath=0&zmath+
+               progAcademic:zmath=0&zmath+progVocational:zmath=0;
+               progAcademic:zmath > progVocational:zmath&
+               progVocational:zmath>0; progVocational:zmath<0")
 }
 }

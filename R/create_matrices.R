@@ -34,7 +34,7 @@ parse_hypothesis <- function(varnames, hyp){
 
   legal_varnames <- sapply(hyp_params, grepl, pattern = "^[a-zA-Z\\.][a-zA-Z0-9\\._]{0,}$")
   if(!all(legal_varnames)){
-    stop("Could not parse the names of the 'estimates' supplied to gorica(). Estimate names must start with a letter or period (.), and can be a combination of letters, digits, period and underscore (_).\nThe estimates violating these rules were originally named: ", paste("'", names_est[!legal_varnames], "'", sep = "", collapse = ", "), ".\nAfter parsing by gorica, these parameters are named: ", paste("'", hyp_params[!legal_varnames], "'", sep = "", collapse = ", "), call. = FALSE)
+    stop("Could not parse the names of the 'estimates' supplied to bain(). Estimate names must start with a letter or period (.), and can be a combination of letters, digits, period and underscore (_).\nThe estimates violating these rules were originally named: ", paste("'", names_est[!legal_varnames], "'", sep = "", collapse = ", "), ".\nAfter parsing by bain, these parameters are named: ", paste("'", hyp_params[!legal_varnames], "'", sep = "", collapse = ", "), call. = FALSE)
   }
 
   # Currently disabled: Is it a problem if there are parameters that don't occur in the hypothesis?
@@ -67,10 +67,8 @@ parse_hypothesis <- function(varnames, hyp){
   hyp_list <- lapply(hyp_list, function(x){sapply(x, order_terms)})
 
   n_constraints <- as.vector(sapply(hyp_list, function(x){c(sum(grepl("=", x)), sum(grepl("[<>]", x)))}))
-  nec_vec <- as.vector(sapply(hyp_list, function(x){sum(grepl("=", x))}))
 
-  #hyp_mat <- do.call(rbind, lapply(1:length(hyp_list), function(i){
-  hyp_mat <- lapply(1:length(hyp_list), function(i){
+  hyp_mat <- do.call(rbind, lapply(1:length(hyp_list), function(i){
     if(n_constraints[((i-1)*2)+1] == 0){
       ERr <- NULL
     } else {
@@ -83,10 +81,12 @@ parse_hypothesis <- function(varnames, hyp){
       IRr <- t(sapply(hyp_list[[i]][grep("[<>]", hyp_list[[i]])],
                       constraint_to_row, varnames = varnames))
     }
-    x <- rbind(ERr, IRr)
-  })
-  list(hyp_mat = matrix(hyp_mat), n_constraints = nec_vec, original_hypothesis = original_hypothesis)
+    rbind(ERr, IRr)
+  }))
+
+  list(hyp_mat = hyp_mat, n_constraints = n_constraints, original_hypothesis = original_hypothesis)
 }
+
 
 #' Expand compound constraints
 #'

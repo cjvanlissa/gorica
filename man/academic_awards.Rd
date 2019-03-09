@@ -13,19 +13,14 @@ Simulated dataset from
 \url{https://stats.idre.ucla.edu/sas/dae/poisson-regression/}.
 }
 \details{
-#' this example, , ,
-and prog is a categorical predictor variable with three levels indicating the
-type of program in which the students were enrolled. It is coded as 1 =
-\"General\", 2 = \"Academic\" and 3 = \"Vocational\".#'
-
-\itemize{
-  \item{"num_awards"}{Outcome variable; indicates the number of
-awards earned by students at a high school in a year}
-  \item{"math"}{Continuous predictor variable; represents students' scores on
-  their math final exam}
-  \item{"prog"}{Categorical predictor variable with three levels, indicating
-  the type of program in which the students were enrolled. It is coded as 1 =
-\"General\", 2 = \"Academic\" and 3 = \"Vocational\".}
+\tabular{lll}{
+  \strong{"num_awards"} \tab \code{integer} \tab Outcome variable; indicates the number of
+awards earned by students at a high school in a year \cr
+  \strong{"math"} \tab \code{integer} \tab Continuous predictor variable; represents students' scores on
+  their math final exam \cr
+  \strong{"prog"} \tab \code{factor} \tab Categorical predictor variable with three levels, indicating
+  the type of program in which the students were enrolled:
+  "General", "Academic", or "Vocational".
 }
 }
 \keyword{datasets}
