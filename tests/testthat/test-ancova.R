@@ -6,7 +6,7 @@ sesamesim$site <- as.factor(sesamesim$site)
 ancov <- lm(postnumb ~ site + prenumb + peabody -1, data = sesamesim)
 
 # Here, an error is expected and appropriate, because the factor levels are '1', '2', etc.
-# Bain cannot process these factor levels. You must stick to the normal syntax rules:
+# Gorica cannot process these factor levels. You must stick to the normal syntax rules:
 # variables start with a letter
 test_that("get_estimates throws error when factor levels are numeric", expect_error(get_estimates(ancov)))
 ancov <- label_estimates(ancov, c("v.1", "v.2", "v.3","v.4", "v.5", "pre", "pea"))
@@ -14,7 +14,7 @@ test_that("get_estimates works after label_estimates",
           expect_identical(names(get_estimates(ancov)), c("v.1", "v.2", "v.3","v.4", "v.5", "pre", "pea")))
 
 set.seed(100)
-y<-bain(ancov, "v.1=v.2=v.3=v.4=v.5;v.2 > v.5 > v.3 > v.1 >v.4;")
+y<-gorica(ancov, "v.1=v.2=v.3=v.4=v.5;v.2 > v.5 > v.3 > v.1 >v.4;")
 
 # ANCOVA VIA BAIN_DEFAULT
 
@@ -55,19 +55,19 @@ covariances <- list(cov1, cov2, cov3, cov4,cov5)
 
 names(est)<- c("v.1", "v.2", "v.3", "v.4","v.5", "pre", "pea")
 set.seed(100)
-z<-bain(est,"v.1=v.2=v.3=v.4=v.5;v.2 > v.5 > v.3 > v.1 >v.4;",n=samp,Sigma=covariances,group_parameters=1,joint_parameters = 2)
+z<-gorica(est,"v.1=v.2=v.3=v.4=v.5;v.2 > v.5 > v.3 > v.1 >v.4;",n=samp,Sigma=covariances,group_parameters=1,joint_parameters = 2)
 
 # TESTING BAIN LM AND DEFAULT VERSUS EACH OTHER
 
-test_that("Bain mutual", {expect_equal(y$fit$Fit , z$fit$Fit)})
-test_that("Bain mutual", {expect_equal(y$fit$Com , z$fit$Com)})
-test_that("Bain mutual", {expect_equal(y$independent_restrictions, z$independent_restrictions)})
-test_that("Bain mutual", {expect_equal(y$b, z$b)})
-test_that("Bain mutual", {expect_equal(as.vector(y$posterior), as.vector(z$posterior))})
-test_that("Bain mutual", {expect_equal(as.vector(y$prior), as.vector(z$prior))})
-test_that("Bain mutual", {expect_equal(y$fit$BF,z$fit$BF)})
-test_that("Bain mutual", {expect_equal(y$fit$PMPb , z$fit$PMPb)})
-test_that("Bain mutual", {expect_equal(as.vector(t(y$BFmatrix)), as.vector(t(z$BFmatrix)))})
+test_that("Gorica mutual", {expect_equal(y$fit$Fit , z$fit$Fit)})
+test_that("Gorica mutual", {expect_equal(y$fit$Com , z$fit$Com)})
+test_that("Gorica mutual", {expect_equal(y$independent_restrictions, z$independent_restrictions)})
+test_that("Gorica mutual", {expect_equal(y$b, z$b)})
+test_that("Gorica mutual", {expect_equal(as.vector(y$posterior), as.vector(z$posterior))})
+test_that("Gorica mutual", {expect_equal(as.vector(y$prior), as.vector(z$prior))})
+test_that("Gorica mutual", {expect_equal(y$fit$BF,z$fit$BF)})
+test_that("Gorica mutual", {expect_equal(y$fit$PMPb , z$fit$PMPb)})
+test_that("Gorica mutual", {expect_equal(as.vector(t(y$BFmatrix)), as.vector(t(z$BFmatrix)))})
 
 
 
@@ -85,8 +85,8 @@ ancov <- lm(postnumb ~ sex + prenumb + peabody -1, data = sesamesim)
 coef(ancov)
 ancov <- label_estimates(ancov, c("a", "b","pre", "pea"))
 set.seed(100)
-#z<-bain(ancov, " pre > 0 &  pea > 0")
-z<-bain(ancov, " a = b & pre > 0 &  pea > 0")
+#z<-gorica(ancov, " pre > 0 &  pea > 0")
+z<-gorica(ancov, " a = b & pre > 0 &  pea > 0")
 
 sesamesim$prenumb <- sesamesim$prenumb-mean(sesamesim$prenumb)
 sesamesim$peabody <- sesamesim$peabody-mean(sesamesim$peabody)
@@ -109,18 +109,18 @@ cov2 <- prep.var * solve(t(cat2) %*% cat2)
 covariances <- list(cov1, cov2)
 
 set.seed(100)
-y<-bain(est,"a = b & pre>0 & pea>0",n=samp,Sigma=covariances,group_parameters=1,joint_parameters = 2)
+y<-gorica(est,"a = b & pre>0 & pea>0",n=samp,Sigma=covariances,group_parameters=1,joint_parameters = 2)
 
 # TESTING BAIN LM AND DEFAULT VERSUS EACH OTHER
 
-test_that("Bain mutual", {expect_equal(y$fit$Fit , z$fit$Fit, tolerance = .001)})
-test_that("Bain mutual", {expect_equal(y$fit$Com , z$fit$Com, tolerance = .001)})
-test_that("Bain mutual", {expect_equal(y$independent_restrictions, z$independent_restrictions)})
-test_that("Bain mutual", {expect_equal(y$b, z$b)})
-test_that("Bain mutual", {expect_equal(as.vector(y$posterior), as.vector(z$posterior))})
-test_that("Bain mutual", {expect_equal(as.vector(y$prior), as.vector(z$prior))})
-test_that("Bain mutual", {expect_equal(y$fit$PMPb , z$fit$PMPb, tolerance =.001)})
-test_that("Bain mutual", {expect_equal(as.vector(t(y$BFmatrix)), as.vector(t(z$BFmatrix)))})
+test_that("Gorica mutual", {expect_equal(y$fit$Fit , z$fit$Fit, tolerance = .001)})
+test_that("Gorica mutual", {expect_equal(y$fit$Com , z$fit$Com, tolerance = .001)})
+test_that("Gorica mutual", {expect_equal(y$independent_restrictions, z$independent_restrictions)})
+test_that("Gorica mutual", {expect_equal(y$b, z$b)})
+test_that("Gorica mutual", {expect_equal(as.vector(y$posterior), as.vector(z$posterior))})
+test_that("Gorica mutual", {expect_equal(as.vector(y$prior), as.vector(z$prior))})
+test_that("Gorica mutual", {expect_equal(y$fit$PMPb , z$fit$PMPb, tolerance =.001)})
+test_that("Gorica mutual", {expect_equal(as.vector(t(y$BFmatrix)), as.vector(t(z$BFmatrix)))})
 
 
 

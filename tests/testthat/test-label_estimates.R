@@ -6,7 +6,7 @@ m_lm <- label_estimates(m_lm, new_labels)
 context("label_estimates")
 
 test_that("label_estimates does not result in error", {
-  expect_error(bain(m_lm, "a < b < c"), NA)
+  expect_error(gorica(m_lm, "a < b < c"), NA)
 })
 
 test_that("label_estimates renames estimates", {

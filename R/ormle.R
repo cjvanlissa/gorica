@@ -17,19 +17,18 @@
 #' @export
 ormle <-
   function(est,covmtrx,constr,rhs,nec){
-  K=length(est)
   covmtrx = as.matrix(covmtrx)
-  Dmat = 2*ginv(covmtrx)
-  dvec = 2*(est%*% ginv(covmtrx))
+  ginvcovmat <- ginv(covmtrx)
+  Dmat = 2*ginvcovmat
+  dvec = 2*(est%*% ginvcovmat)
   solveQP = solve.QP(Dmat, dvec = dvec, t(constr), rhs, meq = nec, factorized = FALSE)
-  tildeQ = solveQP$solution
-restrictedest=solveQP$solution
-names(restrictedest)=names(est)
-loglik =as.numeric( ( -K/2*log(2*pi) )-( 0.5*log(det(covmtrx) ) )-( 0.5* t(est- tildeQ)%*%ginv(covmtrx)%*% (est-tildeQ)) )
+  restrictedest = solveQP$solution
+  names(restrictedest)=names(est)
+  loglik = as.numeric( ( -length(est)/2*log(2*pi) )-( 0.5*log(det(covmtrx) ) )-( 0.5* t(est- restrictedest)%*%ginvcovmat%*% (est-restrictedest)) )
 
-out <- list(est=est, covmtrx=covmtrx, constr=constr, rhs=rhs, nec=nec, logLik=loglik,restrictedest=restrictedest)
-    class(out) <- "ormle"
-    return(out)
+  out <- list(est=est, covmtrx=covmtrx, constr=constr, rhs=rhs, nec=nec, logLik=loglik,restrictedest=restrictedest)
+  class(out) <- "ormle"
+  out
 
    }
 

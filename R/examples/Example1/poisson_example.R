@@ -18,6 +18,7 @@ library(nlme)
 library(quadprog)
 library(R2OpenBUGS)
 
+library(gorica)
 
 #Example 1: Poisson Regression Modeling
 
@@ -26,9 +27,9 @@ library(R2OpenBUGS)
 
 
 #Specification of the data set
-
-academic_awards <- read.csv("R/examples/Example1/academic_awards.csv")
-
+library(gorica)
+#academic_awards <- read.csv("R/examples/Example1/academic_awards.csv")
+#save(academic_awards, file = "data/academic_awards.RData")
 #Specification of the variables in the model
 academic_awards <- within(academic_awards, {
 prog <- factor(prog, levels = 1:3, labels = c("General", "Academic", "Vocational") ) } )
@@ -37,34 +38,30 @@ zmath <- scale(academic_awards$math)
 #Model fitting
 model <- glm(num_awards ~ prog + zmath + prog * zmath, family = "poisson",
 data = academic_awards)
-class(model)
+coef(model)
 
 print("######Maximum Likelihood Estimation######")
 
 strest <- model$coefficients[c(4,5,6)]
-strest
 strcovmtrx <- vcov(model)[c(4,5,6), c(4,5,6)]
-
-print(list(MLEs=strest,Covariance_matrix_of_MLEs=strcovmtrx))
 
 
 
 #Obtaining order-restricted estimates using ormle
-
-
-#Source code in ormle is reached
-#source("restrictedest.txt")
-
-
 #Specification of the hypotheses under evaluation
 
 # Hypothesis 1
 constr <- matrix(c(1, 0, 0,
-1, 1, 0,
-1, 0, 1), nrow = 3, ncol = 3, byrow = TRUE)
+                   1, 1, 0,
+                   1, 0, 1), nrow = 3, ncol = 3, byrow = TRUE)
 rhs <- rep(0, 3)
 nec <- 3
 H1 <- ormle(est = strest, covmtrx = strcovmtrx, const = constr, nec = nec, rhs = rhs)
+
+H1_parse <- gorica:::parse_hypothesis(names(model$coefficients)[4:6],
+                                      "zmath=0&zmath+progAcademic:zmath=0&zmath+progVocational:zmath=0")
+all(constr == H1_parse$hyp_mat[[1]][, -ncol(H1_parse$hyp_mat[[1]])])
+
 
 # Hypothesis 2
 constr <- matrix(c(0, 1, -1,
@@ -73,10 +70,19 @@ rhs <- rep(0, 2)
 nec <- 0
 H2 <- ormle(est = strest, covmtrx = strcovmtrx, const = constr, nec = nec, rhs = rhs)
 
+H2_parse <- gorica:::parse_hypothesis(names(model$coefficients)[4:6],
+                                      "progAcademic:zmath > progVocational:zmath&progVocational:zmath>0")
+
+all(constr == H2_parse$hyp_mat[[1]][, -ncol(H2_parse$hyp_mat[[1]])])
+
 # Hypothesis 3
 constr <- matrix(c(0, 0, -1), nrow = 1, ncol = 3, byrow = TRUE)
 rhs <- rep(0, 1)
 nec <- 0
+H3_parse <- gorica:::parse_hypothesis(names(model$coefficients)[4:6],
+                                      "progVocational:zmath<0")
+all(constr == H3_parse$hyp_mat[[1]][, -ncol(H3_parse$hyp_mat[[1]])])
+
 H3 <- ormle(est = strest, covmtrx = strcovmtrx, const = constr, nec = nec, rhs = rhs)
 
 # The unconstrained hypothesis
@@ -89,7 +95,9 @@ set.seed(111)
 # Source code in gorica is reached, which is saved in the file "Gorica.txt"
 #source("Gorica.txt")
 
-gorica(H1, H2, H3, Hu, iter = 100000)
+old_gor <- gorica:::compare_hypotheses(H1, H2, H3, Hu, iter = 100000)
+
+new_gor <- gorica(x = model, hypothesis = "zmath=0&zmath+progAcademic:zmath=0&zmath+progVocational:zmath=0; progAcademic:zmath > progVocational:zmath&progVocational:zmath>0; progVocational:zmath<0")
 
 #Performing gorica to obtain the values of misfit, complexity, GORICA, and GORICA weights
 print(list(Evaluation_of_the_set_of_hypotheses=gorica(H1, H2, H3, Hu, iter = 100000)))

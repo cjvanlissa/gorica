@@ -6,26 +6,26 @@ gorica <-
 
 gorica_penalty <-
 function(object, iter=100000, mc.cores=1){
-     
+
      if (!(inherits(object, "ormle") )) stop("object needs to be of class ormle")
      if (all(object$constr == 0) & object$nec == 0){
      penalty <- length(object$est)
    } else {
      if (iter < 1) stop("No of iterations < 1")
-      
-      est<-object$est 
+
+      est<-object$est
       K<-length(est)
       covmtrx <- object$covmtrx
       constr<-object$constr
       rhs=object$rhs
       nec=object$nec
-    
+
       Z <- rmvnorm(n=iter, mean=rep(0, K), sigma=covmtrx)
       Dmat2=2*ginv(covmtrx)
 
-      nact <- apply(Z, 1, function(z){ 
+      nact <- apply(Z, 1, function(z){
 
-      dvec2=2*(z%*%ginv(covmtrx)) 
+      dvec2=2*(z%*%ginv(covmtrx))
       solveQP2= solve.QP(Dmat2,dvec2,t(constr),rhs,meq =nec,factorized = FALSE)
       if (solveQP2$iact[1] == 0) return(0) else return(length(solveQP2$iact))
 })
@@ -48,12 +48,12 @@ return(penalty)
    if (iter < 1) stop("No of iterations < 1")
    if (inherits(object, "ormle")) objlist <- list(object, ...) else objlist <- object
    isorlm <- sapply(objlist, function(x) inherits(x, "ormle"))
-   orlmlist <- objlist[isorlm]  
+   orlmlist <- objlist[isorlm]
    Call <- match.call()
    Call$iter <- NULL
    if (inherits(object, "ormle")) names(orlmlist) <- as.character(Call[-1L])[isorlm]
    loglik <- -2*sapply(orlmlist, function(x) x$logLik)
-   penalty <- 2*sapply(orlmlist, function(x) gorica_penalty(x, iter=iter))
+   penalty <- 2*sapply(orlmlist, function(x) gorica_penalty2(x, iter=iter))
    gorica <- loglik + penalty
 delta <- gorica - min(gorica)
 gorica_weights <- exp(-delta/2) / sum(exp(-delta/2))

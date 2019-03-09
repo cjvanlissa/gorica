@@ -1,4 +1,4 @@
-#' Simulated Sesame Street Data
+#' Academic awards data
 #'
 #' Simulated dataset from
 #' \url{https://stats.idre.ucla.edu/sas/dae/poisson-regression/}.

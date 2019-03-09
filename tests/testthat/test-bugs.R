@@ -6,7 +6,7 @@ ancov <- lm(postnumb ~ sex + prenumb + peabody -1, data = sesamesim)
 coef(ancov)
 ancov <- label_estimates(ancov, c("a", "b","pre", "pea"))
 set.seed(100)
-z<-bain(ancov, " pre > 0 &  pea > 0")
+z<-gorica(ancov, " pre > 0 &  pea > 0")
 
 
 sesamesim$site <- as.factor(sesamesim$site)
@@ -15,23 +15,23 @@ ancov <- lm(postnumb~site+prenumb-1,sesamesim)
 coef(ancov)
 ancov <- label_estimates(ancov, c("site1", "site2", "site3","site4","site5","pre"))
 set.seed(100)
-results <- bain(ancov, "site1=site2=site3=site4=site5; site2>site5>site1>site3>site4")
+results <- gorica(ancov, "site1=site2=site3=site4=site5; site2>site5>site1>site3>site4")
 
 # de standardize regression werkt niet
 regr <- lm(postnumb ~ prenumb + peabody, sesamesim)
 get_estimates(regr)
 regr <- label_estimates(regr, c("i", "num", "pea"))
 set.seed(100)
-z<-bain(regr,"num=pea", standardize = TRUE)
+z<-gorica(regr,"num=pea", standardize = TRUE)
 
-# de t.test met formule invoer, dwz, postnumb~sex, werkt de label estimates niet en mogelijk bain ook niet
-# This is because bain overwrites only t.test.default. t.test.formula calls t.test, which is found within the package environment
+# de t.test met formule invoer, dwz, postnumb~sex, werkt de label estimates niet en mogelijk gorica ook niet
+# This is because gorica overwrites only t.test.default. t.test.formula calls t.test, which is found within the package environment
 sesamesim$sex<-as.factor(sesamesim$sex)
 #ttest <- t.test(sesamesim$postnumb[sesamesim$sex==1],sesamesim$postnumb[sesamesim$sex==2],paired = FALSE, var.equal = FALSE)
 ttest <- t.test(postnumb~sex,data=sesamesim,paired = FALSE, var.equal = FALSE)
 expect_error(ttest <- label_estimates(ttest, c("m1","m2")))
 set.seed(100)
-expect_error(z <- bain(ttest, "m1=m2; m1>m2; m1<m2"))
+expect_error(z <- gorica(ttest, "m1=m2; m1>m2; m1<m2"))
 
 #===========================================================================
 # DESCRIPTIVE THE T-TEST
@@ -51,7 +51,7 @@ y<-sesamesim$postnumb[which(sesamesim$sex==2)]
 ttest <- t.test(x,y,paired = FALSE, var.equal = TRUE)
 ttest <- label_estimates(ttest, c("boy","girl"))
 set.seed(100)
-results <- bain(ttest, "boy = girl; boy > girl; boy < girl")
+results <- gorica(ttest, "boy = girl; boy > girl; boy < girl")
 des1 <- descriptives(results, ci = 0.95)
 
 test_that("descriptives", {expect_equal(des1$Estimate , as.numeric(results$estimates))})
@@ -79,6 +79,6 @@ rm(list=ls())
 ttest <- t.test(sesamesim$postnumb)
 ttest <- label_estimates(ttest, c("post"))
 set.seed(100)
-results <- bain(ttest, "post=30; post>30; post<30")
+results <- gorica(ttest, "post=30; post>30; post<30")
 des1 <- descriptives(results, ci = 0.95)
 

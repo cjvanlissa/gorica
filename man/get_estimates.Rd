@@ -7,7 +7,7 @@
 get_estimates(x, ...)
 }
 \arguments{
-\item{x}{A model object for which a \code{\link{bain}} method exists.}
+\item{x}{A model object for which a \code{\link{gorica}} method exists.}
 
 \item{...}{Parameters passed to and from other functions.}
 }
@@ -16,15 +16,17 @@ A named numeric vector.
 }
 \description{
 Get estimates from a model object, the way the
-\code{\link{bain}} function will. This convenience function allows you to see
+\code{\link{gorica}} function will. This convenience function allows you to see
 that coefficients are properly extracted, note how their names will be parsed
-by bain, and inspect their values.
+by gorica, and inspect their values.
 }
 \examples{
+\dontrun{
 # Example 1
 m_tt <- t.test(iris$Sepal.Length[1:20], iris$Sepal.Length[21:40])
 get_estimates(m_tt)
 # Example 2
 m_lm <- lm(Sepal.Length ~., iris)
 get_estimates(m_lm)
+}
 }

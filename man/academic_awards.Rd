@@ -3,7 +3,7 @@
 \docType{data}
 \name{academic_awards}
 \alias{academic_awards}
-\title{Simulated Sesame Street Data}
+\title{Academic awards data}
 \format{A data frame with 200 rows and 4 variables.}
 \usage{
 data(academic_awards)
