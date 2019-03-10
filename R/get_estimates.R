@@ -90,22 +90,19 @@ rename_estimate <- function(estimate){
 #' get_estimates(m_lm)
 #' }
 #' @rdname get_estimates
+#' @export
 get_estimates <- function(x, ...){
   UseMethod("get_estimates", x)
 }
 
-#' @method get_estimates lm
-get_estimates.lm <- function(x, ...){
-  estimates <- x$coefficients
-  variable_types <- sapply(x$model, class)
 
-  # if(any(variable_types[-1] == "factor")){
-  #   names(estimates) <- gsub(paste0("(^|:)(",
-  #                                  paste(names(x$model)[-1][variable_types[-1] == "factor"], sep = "|"),
-  #                                  ")"), "\\1", names(estimates))
-  # }
-  # Restore standard interaction term notation
-  rename_estimate(estimates)
+#' @method get_estimates lm
+#' @export
+get_estimates.lm <- function(x, ...){
+  out <- list(estimate = coef(x),
+              Sigma = vcov(x))
+  class(out) <- "gorica_estimate"
+  out
 }
 
 #' @method get_estimates gorica_htest

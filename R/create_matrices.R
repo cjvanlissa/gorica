@@ -68,7 +68,9 @@ parse_hypothesis <- function(varnames, hyp){
 
   n_constraints <- as.vector(sapply(hyp_list, function(x){c(sum(grepl("=", x)), sum(grepl("[<>]", x)))}))
 
-  hyp_mat <- do.call(rbind, lapply(1:length(hyp_list), function(i){
+  nec_vec <- as.vector(sapply(hyp_list, function(x){sum(grepl("=", x))}))
+
+  hyp_mat <- lapply(1:length(hyp_list), function(i){
     if(n_constraints[((i-1)*2)+1] == 0){
       ERr <- NULL
     } else {
@@ -82,11 +84,11 @@ parse_hypothesis <- function(varnames, hyp){
                       constraint_to_row, varnames = varnames))
     }
     rbind(ERr, IRr)
-  }))
-
-  list(hyp_mat = hyp_mat, n_constraints = n_constraints, original_hypothesis = original_hypothesis)
+  })
+  out <- list(hyp_mat = hyp_mat, n_ec = nec_vec, original_hypothesis = original_hypothesis)
+  class(out) <- "gor_hyp"
+  out
 }
-
 
 #' Expand compound constraints
 #'

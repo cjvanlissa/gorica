@@ -22,8 +22,8 @@
 #' Note that, named means that each estimate has to be labelled such that it can
 #' be referred to in \code{hypotheses}.
 #' }
-#' @param hypothesis	A character string containing the informative hypotheses
-#' to evaluate (see Details).
+#' @param hypothesis A character string containing the informative hypotheses to
+#' evaluate (see Details).
 #' @param ... Additional arguments (see Details).
 #'
 #' @details
@@ -116,47 +116,49 @@ gorica <- function(x, hypothesis, ...) {
 gorica.lm <-
   function(x,
            hypothesis,
-           ...,
-           standardize = FALSE) {
+           ...) {
 
     cl <- match.call()
     Args <- as.list(cl[-1])
 
-    Warnings <- NULL
-
-    hyp_params <- params_in_hyp(hypothesis)
-    coef_in_hyp <- charmatch(rename_function(hyp_params),
-                             rename_function(names(x$coefficients)))
-
-    if(anyNA(coef_in_hyp)){
-      stop("Some of the parameters referred to in the 'hypothesis' do not correspond to parameter names of object 'x'.\n  The following parameter names in the 'hypothesis' did not match any parameters in 'x': ",
-           paste(hyp_params[is.na(coef_in_hyp)], collapse = ", "),
-           "\n  The parameters in object 'x' are named: ",
-           paste(names(x$coefficients), collapse = ", "))
-    }
-    if(any(coef_in_hyp == 0)){
-      stop("Some of the parameters referred to in the 'hypothesis' matched multiple parameter names of object 'x'.\n  The following parameter names in the 'hypothesis' matched multiple parameters in 'x': ",
-           paste(hyp_params[coef_in_hyp == 0], collapse = ", "),
-           "\n  The parameters in object 'x' are named: ",
-           paste(names(x$coefficients), collapse = ", "))
-    }
-
-    estimate <- coef(x)[coef_in_hyp]
-    Sigma <- vcov(x)[coef_in_hyp, coef_in_hyp]
-    Args$x <- estimate
-    Args$Sigma <- Sigma
+    Args$x <- coef(x)
+    Args$Sigma <- vcov(x)
 
     Gorica_res <- do.call(gorica, Args)
     Gorica_res$call <- cl
     Gorica_res$model <- x
 
-    if(!is.null(Warnings)){
-      Gorica_res$Warnings <- Warnings
-    }
+    #if(!is.null(Warnings)){
+    #  Gorica_res$Warnings <- Warnings
+    #}
     class(Gorica_res) <- c("gorica_lm", class(Gorica_res))
     Gorica_res
   }
 
+
+#' @method gorica lm
+#' @export
+gorica.gorica_estimate <-
+  function(x,
+           hypothesis,
+           ...) {
+
+    cl <- match.call()
+    Args <- as.list(cl[-1])
+
+    Args$x <- x$estimate
+    Args$Sigma <- x$Sigma
+
+    Gorica_res <- do.call(gorica, Args)
+    Gorica_res$call <- cl
+    Gorica_res$model <- x
+
+    #if(!is.null(Warnings)){
+    #  Gorica_res$Warnings <- Warnings
+    #}
+    class(Gorica_res) <- c("gorica_ge", class(Gorica_res))
+    Gorica_res
+  }
 
 #' @method gorica default
 #' @export
@@ -167,10 +169,34 @@ gorica.default <- function(x,
                          )
 {
   cl <- match.call()
-
-# Parse hypotheses --------------------------------------------------------
+  # Parse hypotheses --------------------------------------------------------
   #ren_estimate <- rename_estimate(x)
-  parsed_hyp <- parse_hypothesis(names(x), hypothesis)
+  if(inherits(hypothesis, "character")){
+    hyp_params <- params_in_hyp(hypothesis)
+    coef_in_hyp <- charmatch(rename_function(hyp_params),
+                             rename_function(names(x)))
+
+    if(anyNA(coef_in_hyp)){
+      stop("Some of the parameters referred to in the 'hypothesis' do not correspond to parameter names of object 'x'.\n  The following parameter names in the 'hypothesis' did not match any parameters in 'x': ",
+           paste(hyp_params[is.na(coef_in_hyp)], collapse = ", "),
+           "\n  The parameters in object 'x' are named: ",
+           paste(names(x), collapse = ", "))
+    }
+    if(any(coef_in_hyp == 0)){
+      stop("Some of the parameters referred to in the 'hypothesis' matched multiple parameter names of object 'x'.\n  The following parameter names in the 'hypothesis' matched multiple parameters in 'x': ",
+           paste(hyp_params[coef_in_hyp == 0], collapse = ", "),
+           "\n  The parameters in object 'x' are named: ",
+           paste(names(x), collapse = ", "))
+    }
+    hypothesis <- parse_hypothesis(names(x), hypothesis)
+  } else {
+    if(inherits(hypothesis, "list") & !is.null(hypothesis[["hyp_mat"]]) & !is.null(hypothesis[["n_ec"]])){
+      hypothesis$original_hypothesis <- matrix_to_hyp(hypothesis, names(x))
+    } else {
+      stop("Argument 'hypothesis' must either be a character string with inequality constraints, or a list with an element 'hyp_mat', consisting of a list of hypothesis matrices, and and element 'n_ec', consisting of an integer vector with the number of equality constraints for each hypothesis matrix in 'hyp_mat'.")
+    }
+  }
+  #Args$hypothesis <- parsed_hyp
 
   hypotheses <- mapply(function(this_hyp, nec_num){
     ormle(x,
@@ -179,7 +205,7 @@ gorica.default <- function(x,
           nec = nec_num,
           this_hyp[, ncol(this_hyp)]
           )
-  }, this_hyp = parsed_hyp$hyp_mat, nec_num = parsed_hyp$n_constraints, SIMPLIFY = FALSE)
+  }, this_hyp = hypothesis$hyp_mat, nec_num = hypothesis$n_ec, SIMPLIFY = FALSE)
   hypotheses <- c(hypotheses,
                   list(ormle(est = x,
                           covmtrx = Sigma,
@@ -193,11 +219,10 @@ gorica.default <- function(x,
     fit = data.frame(res),
     #BFmatrix = BFmatrix,
     #b = b,
-    #prior = thetacovprior,
-    #posterior = thetacovpost,
+
     call = cl,
     model = x,
-    hypotheses = gsub("___X___", ":", parsed_hyp$original_hypothesis),
+    hypotheses = gsub("___X___", ":", hypothesis$original_hypothesis),
     #independent_restrictions = rank_hyp,
     estimates = x#,
     #n = n

@@ -21,8 +21,8 @@ Note that, named means that each estimate has to be labelled such that it can
 be referred to in \code{hypotheses}.
 }}
 
-\item{hypothesis}{A character string containing the informative hypotheses
-to evaluate (see Details).}
+\item{hypothesis}{A character string containing the informative hypotheses to
+evaluate (see Details).}
 
 \item{...}{Additional arguments (see Details).}
 }

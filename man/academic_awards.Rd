@@ -14,11 +14,11 @@ Simulated dataset from
 }
 \details{
 \tabular{lll}{
-  \strong{"num_awards"} \tab \code{integer} \tab Outcome variable; indicates the number of
+  \strong{num_awards} \tab \code{integer} \tab Outcome variable; indicates the number of
 awards earned by students at a high school in a year \cr
-  \strong{"math"} \tab \code{integer} \tab Continuous predictor variable; represents students' scores on
+  \strong{math} \tab \code{integer} \tab Continuous predictor variable; represents students' scores on
   their math final exam \cr
-  \strong{"prog"} \tab \code{factor} \tab Categorical predictor variable with three levels, indicating
+  \strong{prog} \tab \code{factor} \tab Categorical predictor variable with three levels, indicating
   the type of program in which the students were enrolled:
   "General", "Academic", or "Vocational".
 }
