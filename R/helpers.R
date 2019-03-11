@@ -1,12 +1,3 @@
-label_section <- function(sec, pref = "", mid = "", post = ""){
-  #sec <- estimate_labels$lambda
-  tmp <- matrix(paste0(pref, rep(colnames(sec), each = nrow(sec)), mid, rep(rownames(sec), ncol(sec)), post), nrow = dim(sec)[1], ncol = dim(sec)[2])
-  if(mid == "_WITH_"){
-    diag(tmp) <- gsub("^.+_WITH_", "Var_", diag(tmp))
-  }
-  tmp
-}
-
 
 # Simple longest common substring argument, starting from beginning of string
 LCS <- function(a, b) {

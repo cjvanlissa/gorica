@@ -10,6 +10,20 @@
     "delta", "vector", "bla", "", ""
   ), ncol = 5, byrow = TRUE)
 
+label_section <- function(sec, pref = "", mid = "", post = ""){
+  #browser()
+  if(mid == "_ON_"){
+    tmp <- matrix(paste0(pref, rep(rownames(sec), ncol(sec)), mid, rep(colnames(sec), each = nrow(sec)), post), nrow = dim(sec)[1], ncol = dim(sec)[2])
+  } else {
+    tmp <- matrix(paste0(pref, rep(colnames(sec), each = nrow(sec)), mid, rep(rownames(sec), ncol(sec)), post), nrow = dim(sec)[1], ncol = dim(sec)[2])
+  }
+  #tmp <- matrix(paste0(pref, rep(colnames(sec), each = nrow(sec)), mid, rep(rownames(sec), ncol(sec)), post), nrow = dim(sec)[1], ncol = dim(sec)[2])
+  if(mid == "_WITH_"){
+    diag(tmp) <- gsub("^.+_WITH_", "Var_", diag(tmp))
+  }
+  tmp
+}
+
 #' @method get_estimates lavaan
 #' @export
 get_estimates.lavaan <- function(x, ...){
@@ -48,14 +62,14 @@ get_estimates.lavaan <- function(x, ...){
     dups <- estimates[duplicated(estimates$id, fromLast = T), ]
     estimates <- estimates[!duplicated(estimates$id), ]
     duplicates <- lapply(unique(dups$id), function(o){dups$label[dups$id == o]})
-    names(duplicates) <- estimates$label[match(dups$id, estimate$id)]
+    names(duplicates) <- estimates$label[match(dups$id, estimates$id)]
   }
   estimates <- estimates[order(estimates$id), ]
 
 
 
-  coefs <- estimate$Estimate
-  names(coefs) <- estimate$label
+  coefs <- estimates$Estimate
+  names(coefs) <- estimates$label
 
   Sigma <- Sigma[estimates$id, estimates$id]
   colnames(Sigma) <- estimates$label

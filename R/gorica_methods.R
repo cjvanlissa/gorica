@@ -159,8 +159,32 @@ gorica.mplus.model <-
     Gorica_res
   }
 
+#' @method gorica lavaan
+#' @export
+gorica.lavaan <-
+  function(x,
+           hypothesis,
+           ...) {
 
-#' @method gorica lm
+    cl <- match.call()
+    Args <- as.list(cl[-1])
+    mplus_est <- get_estimates(x)
+    Args$x <- mplus_est$estimate
+    Args$Sigma <- mplus_est$Sigma
+
+    Gorica_res <- do.call(gorica, Args)
+    Gorica_res$call <- cl
+    Gorica_res$model <- x
+
+    #if(!is.null(Warnings)){
+    #  Gorica_res$Warnings <- Warnings
+    #}
+    class(Gorica_res) <- c("gorica_lavaan", class(Gorica_res))
+    Gorica_res
+  }
+
+
+#' @method gorica gorica_estimate
 #' @export
 gorica.gorica_estimate <-
   function(x,
