@@ -1,3 +1,16 @@
+# Simple longest common substring argument, starting from beginning of string
+LCS <- function(a, b) {
+  a <- strsplit(a, "")[[1]]
+  b  <- strsplit(b, "")[[1]]
+  lastchar <- suppressWarnings(which(!(a == b)))[1] - 1
+
+  if(lastchar > 0){
+    paste0(a[1:lastchar], collapse = "")
+  } else {
+    ""
+  }
+}
+
 escape_special <- function (strings){
   vals <- c("\\\\", "\\[", "\\]", "\\(", "\\)", "\\{", "\\}",
             "\\^", "\\$", "\\*", "\\+", "\\?", "\\.", "\\|")
