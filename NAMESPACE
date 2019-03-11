@@ -2,6 +2,7 @@
 
 S3method(compare_hypotheses,list)
 S3method(compare_hypotheses,ormle)
+S3method(get_estimates,lavaan)
 S3method(get_estimates,lm)
 S3method(get_estimates,mplus.model)
 S3method(gorica,default)

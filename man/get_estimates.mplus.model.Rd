@@ -3,13 +3,14 @@
 \name{get_estimates.mplus.model}
 \alias{get_estimates.mplus.model}
 \title{tmp2 <-
-x <- readModels("c:/git_repositories/tmp2_s.out")
-get_estimates
+x <-
+get_estimates(readModels("c:/git_repositories/tmp2_s.out"))
 tmp3 <- readModels("C:/Git_Repositories/conflict_spillover/mplus/16-04-2018_ang_m_dsem.out")
 par_spec <- tmp3$tech1$parameterSpecification
-x <- readModels("binary/ex9.11.out")
-x <- readModels("binary/ex3.12.out")
-tmp5 <- readModels("c:/git_repositories/tmp4.out")
+tmp <- get_estimates(readModels("binary/ex9.11.out"))
+tmp <- get_estimates(readModels("binary/ex3.12.out"))
+tmp5 <- get_estimates(readModels("c:/git_repositories/tmp4.out"))
+tmp5$
 x <- tmp5
 par_spec <- tmp4$tech1$parameterSpecification
 estimate <- tmp4$parameters$unstandardized}
@@ -18,13 +19,14 @@ estimate <- tmp4$parameters$unstandardized}
 }
 \description{
 tmp2 <-
-x <- readModels("c:/git_repositories/tmp2_s.out")
-get_estimates
+x <-
+get_estimates(readModels("c:/git_repositories/tmp2_s.out"))
 tmp3 <- readModels("C:/Git_Repositories/conflict_spillover/mplus/16-04-2018_ang_m_dsem.out")
 par_spec <- tmp3$tech1$parameterSpecification
-x <- readModels("binary/ex9.11.out")
-x <- readModels("binary/ex3.12.out")
-tmp5 <- readModels("c:/git_repositories/tmp4.out")
+tmp <- get_estimates(readModels("binary/ex9.11.out"))
+tmp <- get_estimates(readModels("binary/ex3.12.out"))
+tmp5 <- get_estimates(readModels("c:/git_repositories/tmp4.out"))
+tmp5$
 x <- tmp5
 par_spec <- tmp4$tech1$parameterSpecification
 estimate <- tmp4$parameters$unstandardized
