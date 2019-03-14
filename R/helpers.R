@@ -1,3 +1,56 @@
+reverse_rename_function <- function(x){
+  x <- gsub("___X___", ":", x)
+  x <- gsub("___thres___", "\\|", x)
+  x <- gsub("___by___", "=~", x)
+  x <- gsub("___w___", "~~", x)
+  x <- gsub("___int___", "~1", x)
+  x <- gsub("___on___", "~", x)
+  x
+}
+
+#' @importFrom utils tail
+rename_function <- function(text){
+  fulltext <- paste(text, collapse = "")
+  new_names <- names_est <- text
+  #if(grepl("[\\(\\)]", fulltext)){
+  #  text <- gsub("\\(", "___O___", text)
+  #  text <- gsub("\\)", "___C___", text)
+  #}
+  text[text == "(Intercept)"] <- "Intercept"
+  if(grepl(":", fulltext)){
+    text <- gsub(":", "___X___", text)
+  }
+
+  if(grepl("mean of ", fulltext)){
+    text <- gsub("mean of the differences", "difference", text)
+    text <- gsub("mean of ", "", text)
+  }
+
+  # If any variables are subsetted from data.frames: remode the df part of the name
+  remove_df <- sapply(text, grepl, pattern = "[\\]\\$]+", perl = TRUE)
+  if(any(remove_df)){
+    text[remove_df] <- sapply(text[remove_df], function(x){
+      tmp_split <- strsplit(x, "[\\]\\$]+", perl = TRUE)[[1]]
+      if(length(tmp_split)==1){
+        x
+      } else {
+        tail(tmp_split, 1)
+      }
+    })
+  }
+
+  text <- gsub(":", "___text___", text)
+  text <- gsub("\\|", "___thres___", text)
+  text <- gsub("=~", "___by___", text)
+  text <- gsub("~~", "___w___", text)
+  text <- gsub("~1", "___int___", text)
+  text <- gsub("~", "___on___", text)
+
+  text
+}
+
+
+
 
 # Simple longest common substring argument, starting from beginning of string
 LCS <- function(a, b) {

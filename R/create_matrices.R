@@ -34,7 +34,7 @@ parse_hypothesis <- function(varnames, hyp){
 
   legal_varnames <- sapply(hyp_params, grepl, pattern = "^[a-zA-Z\\.][a-zA-Z0-9\\._]{0,}$")
   if(!all(legal_varnames)){
-    stop("Could not parse the names of the 'estimates' supplied to bain(). Estimate names must start with a letter or period (.), and can be a combination of letters, digits, period and underscore (_).\nThe estimates violating these rules were originally named: ", paste("'", names_est[!legal_varnames], "'", sep = "", collapse = ", "), ".\nAfter parsing by bain, these parameters are named: ", paste("'", hyp_params[!legal_varnames], "'", sep = "", collapse = ", "), call. = FALSE)
+    stop("Could not parse the names of the 'estimates' supplied to gorica(). Estimate names must start with a letter or period (.), and can be a combination of letters, digits, period and underscore (_).\nThe estimates violating these rules were originally named: ", paste("'", names_est[!legal_varnames], "'", sep = "", collapse = ", "), ".\nAfter parsing by gorica, these parameters are named: ", paste("'", hyp_params[!legal_varnames], "'", sep = "", collapse = ", "), call. = FALSE)
   }
 
   # Currently disabled: Is it a problem if there are parameters that don't occur in the hypothesis?

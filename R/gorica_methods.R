@@ -270,7 +270,7 @@ gorica.default <- function(x,
 
     call = cl,
     model = x,
-    hypotheses = gsub("___X___", ":", hypothesis$original_hypothesis),
+    hypotheses = reverse_rename_function(hypothesis$original_hypothesis),
     #independent_restrictions = rank_hyp,
     estimates = x#,
     #n = n

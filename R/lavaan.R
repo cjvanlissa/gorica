@@ -1,26 +1,26 @@
 .lavaan_sections <- matrix(c(
-    "tau", "vector", "Thres_", "", "",
-    "nu", "vector", "Intercept_", "", "",
-    "lambda", "matrix", "", "_BY_", "",
-    "theta", "matrix", "", "_WITH_", "",
-    "alpha", "vector", "Intercept_", "", "",
-    "beta", "matrix", "", "_ON_", "",
-    "gamma", "matrix", "", "_ON_", "",
-    "psi", "matrix", "", "_WITH_", "",
+    "tau", "vector", "___Thres___", "", "",
+    "nu", "vector", "___Int___", "", "~1",
+    "lambda", "matrix", "", "=~", "",
+    "theta", "matrix", "", "~~", "",
+    "alpha", "vector", "___Int___", "", "~1",
+    "beta", "matrix", "", "~", "",
+    "gamma", "matrix", "", "~", "",
+    "psi", "matrix", "", "~~", "",
     "delta", "vector", "bla", "", ""
   ), ncol = 5, byrow = TRUE)
 
 label_section <- function(sec, pref = "", mid = "", post = ""){
   #browser()
-  if(mid == "_ON_"){
+  if(mid == "~"){
     tmp <- matrix(paste0(pref, rep(rownames(sec), ncol(sec)), mid, rep(colnames(sec), each = nrow(sec)), post), nrow = dim(sec)[1], ncol = dim(sec)[2])
   } else {
     tmp <- matrix(paste0(pref, rep(colnames(sec), each = nrow(sec)), mid, rep(rownames(sec), ncol(sec)), post), nrow = dim(sec)[1], ncol = dim(sec)[2])
   }
   #tmp <- matrix(paste0(pref, rep(colnames(sec), each = nrow(sec)), mid, rep(rownames(sec), ncol(sec)), post), nrow = dim(sec)[1], ncol = dim(sec)[2])
-  if(mid == "_WITH_"){
-    diag(tmp) <- gsub("^.+_WITH_", "Var_", diag(tmp))
-  }
+  #if(mid == "_WITH_"){
+  #  diag(tmp) <- gsub("^.+_WITH_", "Var_", diag(tmp))
+  #}
   tmp
 }
 
@@ -30,31 +30,63 @@ get_estimates.lavaan <- function(x, ...){
   param_id <- lavInspect(x, "free")
   est_lavaan <- lavInspect(x, "est")
   Sigma <- lavTech(x, "vcov")
-  keep <- lapply(param_id, `==`, 0)
-  if(any(names(keep) %in% c("theta", "psi", "beta", "gamma"))){
-    keep[na.omit(match(c("theta", "psi", "beta", "gamma"), names(keep)))] <-
-      lapply(
-      keep[na.omit(match(c("theta", "psi", "beta", "gamma"), names(keep)))],
-      function(x){x[upper.tri(x)] <- TRUE
-      x}
-    )
+
+# From Mplus --------------------------------------------------------------
+
+  if(!all(names(param_id) %in% .lavaan_sections[, 1])){
+    keep <- lapply(param_id, function(this_group){
+      lapply(names(this_group), function(x){
+        out <- this_group[[x]] == 0
+        if(x %in% c("theta", "psi", "beta", "gamma")){
+          out[upper.tri(out)] <- TRUE
+      }
+      out
+      })
+    })
+
+
+    estimate_labels <- lapply(names(param_id), function(group_name) {
+        lapply(names(param_id[[group_name]]), function(x) {
+          label_section(
+            sec = param_id[[group_name]][[x]],
+            pref = .lavaan_sections[.lavaan_sections[, 1] == x, 3],
+            mid = .lavaan_sections[.lavaan_sections[, 1] == x, 4],
+            post = paste(.lavaan_sections[.lavaan_sections[, 1] == x, 5], group_name, sep = ".")
+          )
+        })
+      })
+
+  } else {
+    keep <- lapply(names(param_id), function(x) {
+      out <- param_id[[x]] == 0
+      if (x %in% c("theta", "psi", "beta", "gamma")) {
+        out[upper.tri(out)] <- TRUE
+      }
+      out
+    })
+    estimate_labels <- lapply(names(param_id), function(x){
+      label_section(sec = param_id[[x]],
+                    pref = .lavaan_sections[.lavaan_sections[, 1] == x, 3],
+                    mid = .lavaan_sections[.lavaan_sections[, 1] == x, 4],
+                    post = .lavaan_sections[.lavaan_sections[, 1] == x, 5])
+    })
+
   }
 
-  estimate_labels <- lapply(names(param_id), function(x){
-    label_section(sec = param_id[[x]],
-                  pref = .lavaan_sections[.lavaan_sections[, 1] == x, 3],
-                  mid = .lavaan_sections[.lavaan_sections[, 1] == x, 4],
-                  post = .lavaan_sections[.lavaan_sections[, 1] == x, 5])
-  })
+# End from Mplus ----------------------------------------------------------
 
+
+
+
+
+  estimate_labels <- gsub("^___(Thres|Int)___(threshold|intercept)", "", unlist(estimate_labels))
   estimates <- data.frame(
     Estimate = unlist(est_lavaan),
     id = as.integer(unlist(param_id)),
-    label = unlist(estimate_labels),
+    label = estimate_labels,
     keep = !unlist(keep),
     stringsAsFactors = FALSE)
   estimates <- estimates[estimates$keep, ]
-  #estimates <- estimates[!estimates$id == 0, ]
 
   duplicates <- NULL
   if(any(duplicated(estimates$id))){
