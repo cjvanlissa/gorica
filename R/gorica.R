@@ -30,12 +30,12 @@ compare_hypotheses.ormle <-
     Call <- match.call()
     Call$iter <- NULL
     if (inherits(object, "ormle")) names(orlmlist) <- as.character(Call[-1L])[isorlm]
-    loglik <- -2*sapply(orlmlist, function(x) x$logLik)
-    penalty <- 2*sapply(orlmlist, function(x) gorica_penalty3(x, iter = iter))
-    gor <- loglik + penalty
+    loglik <- sapply(orlmlist, function(x) x$logLik)
+    penalty <- sapply(orlmlist, function(x) gorica_penalty3(x, iter = iter))
+    gor <- -2*loglik + 2*penalty
     delta <- gor - min(gor)
     gorica_weights <- exp(-delta/2) / sum(exp(-delta/2))
-    data.frame(misfit = loglik,complexity = penalty,gorica = gor,gorica_weights = round(gorica_weights,4))
+    data.frame(loglik = loglik, penalty = penalty, gorica = gor, gorica_weights = round(gorica_weights,4))
   }
 
 #' @method compare_hypotheses list
