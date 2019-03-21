@@ -168,9 +168,12 @@ gorica.default <- function(x,
                     ))
   }
   res <- compare_hypotheses(hypotheses)
+  fit <- res$comparisons
   if(comparison == "complement"){
     browser()
-    do.call(comp, c(hypotheses[[1]], wt_bar = res[[1]][[2]]))
+    complement <- do.call(comp, c(hypotheses[[1]], wt_bar = res[[1]][[2]]))
+    fit <- rbind(fit, c(complement, 0))
+    fit$gorica_weights <- compute_weights(fit$gorica)
   }
 
 

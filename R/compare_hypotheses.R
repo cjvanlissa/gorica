@@ -34,12 +34,10 @@ compare_hypotheses.ormle <-
     loglik <- sapply(orlmlist, function(x) x$logLik)
     penalty <- sapply(gorica_penalties, `[[`, "penalty")
     gor <- -2*loglik + 2*penalty
-    delta <- gor - min(gor)
-    gorica_weights <- exp(-delta/2) / sum(exp(-delta/2))
     list(comparisons = data.frame(loglik = loglik,
                penalty = penalty,
                gorica = gor,
-               gorica_weights = gorica_weights),
+               gorica_weights = compute_weights(gor)),
          gorica_penalties = gorica_penalties
     )
   }
@@ -151,3 +149,10 @@ gorica_penalty <-
 
     }
   }
+
+
+compute_weights <- function(gorica){
+  if(length(gorica) < 2) return(1)
+  delta <- gorica - min(gorica)
+  exp(-delta/2) / sum(exp(-delta/2))
+}
