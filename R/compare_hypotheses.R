@@ -36,8 +36,7 @@ compare_hypotheses.ormle <-
     gor <- -2*loglik + 2*penalty
     list(comparisons = data.frame(loglik = loglik,
                penalty = penalty,
-               gorica = gor,
-               gorica_weights = compute_weights(gor)),
+               gorica = gor),
          gorica_penalties = gorica_penalties
     )
   }

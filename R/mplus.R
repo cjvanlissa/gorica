@@ -1,6 +1,6 @@
-#' library(MplusAutomation)
-#' get_estimates(readModels("c:/git_repositories/tmp2_s.out"))
-#' gorica(readModels("c:/git_repositories/tmp2_s.out"), "Intercepts.M_3.HI>Intercepts.DE_4.HI")
+#' library(motley)
+#' tmp <- readModels("c:/git_repositories/tmp2_s.out")
+#' gorica(readModels("c:/git_repositories/tmp2_s.out"), "Intercepts.M_3.H>Intercepts.DE_4.H")
 #' tmp3 <- readModels("C:/Git_Repositories/conflict_spillover/mplus/16-04-2018_ang_m_dsem.out")
 #' par_spec <- tmp3$tech1$parameterSpecification
 #' tmp <- get_estimates(readModels("binary/ex9.11.out"))

@@ -31,9 +31,6 @@ library(gorica)
 #academic_awards <- read.csv("R/examples/Example1/academic_awards.csv")
 #save(academic_awards, file = "data/academic_awards.RData")
 #Specification of the variables in the model
-academic_awards <- within(academic_awards, {
-prog <- factor(prog, levels = 1:3, labels = c("General", "Academic", "Vocational") ) } )
-zmath <- scale(academic_awards$math)
 
 #Model fitting
 model <- glm(num_awards ~ prog + zmath + prog * zmath, family = "poisson",
@@ -96,8 +93,8 @@ set.seed(111)
 #source("Gorica.txt")
 
 old_gor <- gorica:::compare_hypotheses(H1, H2, H3, Hu, iter = 100000)
-
-new_gor <- gorica(x = model, hypothesis = "zmath=0&zmath+progAcademic:zmath=0&zmath+progVocational:zmath=0; progAcademic:zmath > progVocational:zmath&progVocational:zmath>0; progVocational:zmath<0")
+get_estimates(model)
+new_gor <- gorica(x = model, hypothesis = "zmath=0&zmath+progGeneral:zmath=0&zmath+progVocational:zmath=0")
 
 #Performing gorica to obtain the values of misfit, complexity, GORICA, and GORICA weights
 print(list(Evaluation_of_the_set_of_hypotheses=gorica(H1, H2, H3, Hu, iter = 100000)))

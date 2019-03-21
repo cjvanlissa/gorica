@@ -4,7 +4,7 @@
 \alias{gorica}
 \title{Bayes factors for informative hypotheses}
 \usage{
-gorica(x, hypothesis, ...)
+gorica(x, hypothesis, comparison = "unconstrained", ...)
 }
 \arguments{
 \item{x}{An R object containing the outcome of a statistical analysis.

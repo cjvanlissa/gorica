@@ -122,6 +122,14 @@ gorica.default <- function(x,
   cl <- match.call()
   # Parse hypotheses --------------------------------------------------------
   #ren_estimate <- rename_estimate(x)
+  if(!inherits(comparison, "character")|length(comparison) > 1){
+    stop("Argument 'comparison' must be an atomic character string.")
+  } else {
+    comp_arg <- pmatch(comparison, c("unconstrained", "complement", "none"))
+    if(is.na(comp_arg)) stop("Argument 'comparison' did not match one of the available options: 'unconstrained', 'complement', or 'none'.")
+    comparison <- c("unconstrained", "complement", "none")[pmatch(comparison, c("unconstrained", "complement", "none"))]
+  }
+
   if(inherits(hypothesis, "character")){
     hyp_params <- params_in_hyp(hypothesis)
     coef_in_hyp <- charmatch(rename_function(hyp_params),
@@ -147,7 +155,6 @@ gorica.default <- function(x,
       stop("Argument 'hypothesis' must either be a character string with inequality constraints, or a list with an element 'hyp_mat', consisting of a list of hypothesis matrices, and and element 'n_ec', consisting of an integer vector with the number of equality constraints for each hypothesis matrix in 'hyp_mat'.")
     }
   }
-  #Args$hypothesis <- parsed_hyp
 
   hypotheses <- mapply(function(this_hyp, nec_num){
     ormle(x,
@@ -158,6 +165,8 @@ gorica.default <- function(x,
     )
   }, this_hyp = hypothesis$hyp_mat, nec_num = hypothesis$n_ec, SIMPLIFY = FALSE)
 
+  hyp <- reverse_rename_function(hypothesis$original_hypothesis)
+
   if(comparison == "unconstrained"){
     hypotheses <- c(hypotheses,
                     list(ormle(est = x,
@@ -166,25 +175,26 @@ gorica.default <- function(x,
                                nec = 0,
                                rhs = 0)
                     ))
+    hyp <- c(hyp, "Hu")
   }
   res <- compare_hypotheses(hypotheses)
   fit <- res$comparisons
   if(comparison == "complement"){
-    browser()
     complement <- do.call(comp, c(hypotheses[[1]], wt_bar = res[[1]][[2]]))
-    fit <- rbind(fit, c(complement, 0))
-    fit$gorica_weights <- compute_weights(fit$gorica)
+    fit <- rbind(fit, complement)
+    hyp <- c(hyp, "Hc")
   }
 
+  fit$gorica_weights <- compute_weights(fit$gorica)
 
   Goricares <- list(
-    fit = res$comparisons,
+    fit = fit,
     #BFmatrix = BFmatrix,
     #b = b,
 
     call = cl,
     model = x,
-    hypotheses = reverse_rename_function(hypothesis$original_hypothesis),
+    hypotheses = hyp,
     #independent_restrictions = rank_hyp,
     estimates = x#,
     #n = n
