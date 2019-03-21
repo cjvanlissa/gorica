@@ -31,13 +31,13 @@ compare_hypotheses.ormle <-
     Call$iter <- NULL
     if (inherits(object, "ormle")) names(orlmlist) <- as.character(Call[-1L])[isorlm]
     gorica_penalties <- lapply(orlmlist, function(x) gorica_penalty3(x, iter = iter))
-    loglik <- -2*sapply(orlmlist, function(x) x$logLik)
-    penalty <- 2*sapply(gorica_penalties, `[[`, "penalty")
-    gor <- loglik + penalty
+    loglik <- sapply(orlmlist, function(x) x$logLik)
+    penalty <- sapply(gorica_penalties, `[[`, "penalty")
+    gor <- -2*loglik + 2*penalty
     delta <- gor - min(gor)
     gorica_weights <- exp(-delta/2) / sum(exp(-delta/2))
-    list(comparisons = data.frame(misfit = loglik,
-               complexity = penalty,
+    list(comparisons = data.frame(loglik = loglik,
+               penalty = penalty,
                gorica = gor,
                gorica_weights = gorica_weights),
          gorica_penalties = gorica_penalties
