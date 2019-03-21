@@ -70,9 +70,13 @@ get_estimates.lm <- function(x, ...){
   out
 }
 
-#' @method get_estimates gorica_htest
+#' @method get_estimates bain_htest
+#' @export
 get_estimates.gorica_htest <- function(x, ...){
-  rename_estimate(x$estimate)
+  out <- list(estimate = coef(x),
+              Sigma = vcov(x))
+  class(out) <- "gorica_estimate"
+  out
 }
 
 

@@ -106,115 +106,18 @@
 #' @importFrom stats as.formula coef complete.cases cov lm model.frame
 #' model.matrix pt qt sd setNames summary.lm var vcov
 #'
-gorica <- function(x, hypothesis, ...) {
+gorica <- function(x, hypothesis, comparison = "unconstrained", ...) {
   UseMethod("gorica", x)
 }
-
-
-#' @method gorica lm
-#' @export
-gorica.lm <-
-  function(x,
-           hypothesis,
-           ...) {
-
-    cl <- match.call()
-    Args <- as.list(cl[-1])
-
-    Args$x <- coef(x)
-    Args$Sigma <- vcov(x)
-
-    Gorica_res <- do.call(gorica, Args)
-    Gorica_res$call <- cl
-    Gorica_res$model <- x
-
-    #if(!is.null(Warnings)){
-    #  Gorica_res$Warnings <- Warnings
-    #}
-    class(Gorica_res) <- c("gorica_lm", class(Gorica_res))
-    Gorica_res
-  }
-
-#' @method gorica mplus.model
-#' @export
-gorica.mplus.model <-
-  function(x,
-           hypothesis,
-           ...) {
-
-    cl <- match.call()
-    Args <- as.list(cl[-1])
-    mplus_est <- get_estimates(x)
-    Args$x <- mplus_est$estimate
-    Args$Sigma <- mplus_est$Sigma
-
-    Gorica_res <- do.call(gorica, Args)
-    Gorica_res$call <- cl
-    Gorica_res$model <- x
-
-    #if(!is.null(Warnings)){
-    #  Gorica_res$Warnings <- Warnings
-    #}
-    class(Gorica_res) <- c("gorica_mplus", class(Gorica_res))
-    Gorica_res
-  }
-
-#' @method gorica lavaan
-#' @export
-gorica.lavaan <-
-  function(x,
-           hypothesis,
-           ...) {
-
-    cl <- match.call()
-    Args <- as.list(cl[-1])
-    mplus_est <- get_estimates(x)
-    Args$x <- mplus_est$estimate
-    Args$Sigma <- mplus_est$Sigma
-
-    Gorica_res <- do.call(gorica, Args)
-    Gorica_res$call <- cl
-    Gorica_res$model <- x
-
-    #if(!is.null(Warnings)){
-    #  Gorica_res$Warnings <- Warnings
-    #}
-    class(Gorica_res) <- c("gorica_lavaan", class(Gorica_res))
-    Gorica_res
-  }
-
-
-#' @method gorica gorica_estimate
-#' @export
-gorica.gorica_estimate <-
-  function(x,
-           hypothesis,
-           ...) {
-
-    cl <- match.call()
-    Args <- as.list(cl[-1])
-
-    Args$x <- x$estimate
-    Args$Sigma <- x$Sigma
-
-    Gorica_res <- do.call(gorica, Args)
-    Gorica_res$call <- cl
-    Gorica_res$model <- x
-
-    #if(!is.null(Warnings)){
-    #  Gorica_res$Warnings <- Warnings
-    #}
-    class(Gorica_res) <- c("gorica_ge", class(Gorica_res))
-    Gorica_res
-  }
 
 #' @method gorica default
 #' @export
 gorica.default <- function(x,
-                         hypothesis,
-                         Sigma,
-                         ...
-                         )
+                           hypothesis,
+                           comparison = "unconstrained",
+                           Sigma,
+                           ...
+)
 {
   cl <- match.call()
   # Parse hypotheses --------------------------------------------------------
@@ -252,19 +155,27 @@ gorica.default <- function(x,
           constr = this_hyp[, -ncol(this_hyp), drop = FALSE],
           nec = nec_num,
           this_hyp[, ncol(this_hyp)]
-          )
+    )
   }, this_hyp = hypothesis$hyp_mat, nec_num = hypothesis$n_ec, SIMPLIFY = FALSE)
-  hypotheses <- c(hypotheses,
-                  list(ormle(est = x,
-                          covmtrx = Sigma,
-                          const = matrix(c(rep(0, length(x))), nrow = 1),
-                          nec = 0,
-                          rhs = 0)
-                  ))
+
+  if(comparison == "unconstrained"){
+    hypotheses <- c(hypotheses,
+                    list(ormle(est = x,
+                               covmtrx = Sigma,
+                               const = matrix(c(rep(0, length(x))), nrow = 1),
+                               nec = 0,
+                               rhs = 0)
+                    ))
+  }
   res <- compare_hypotheses(hypotheses)
+  if(comparison == "complement"){
+    browser()
+    do.call(comp, c(hypotheses[[1]], wt_bar = res[[1]][[2]]))
+  }
+
 
   Goricares <- list(
-    fit = data.frame(res),
+    fit = res$comparisons,
     #BFmatrix = BFmatrix,
     #b = b,
 
@@ -286,6 +197,7 @@ gorica.default <- function(x,
 gorica.htest <-
   function(x,
            hypothesis,
+           comparison = "unconstrained",
            ...) {
     stop("To be able to run gorica on the results of an object returned by t.test(), you must first load the 'gorica' package, and then conduct your t.test. The standard t.test does not return group-specific variances and sample sizes, which are required by gorica. When you load the gorica package, the standard t.test is replaced by a version that does return this necessary information.")
   }
@@ -295,6 +207,7 @@ gorica.htest <-
 gorica.gorica_htest <-
   function(x,
            hypothesis,
+           comparison = "unconstrained",
            ...) {
     cl <- match.call()
     Args <- as.list(cl[-1])
@@ -329,3 +242,107 @@ gorica.gorica_htest <-
     class(Gorica_res) <- c("gorica_htest", class(Gorica_res))
     Gorica_res
   }
+
+
+
+#' @method gorica lm
+#' @export
+gorica.lm <-
+  function(x,
+           hypothesis,
+           comparison = "unconstrained",
+           ...) {
+
+    cl <- match.call()
+    Args <- as.list(cl[-1])
+
+    Args$x <- coef(x)
+    Args$Sigma <- vcov(x)
+
+    Gorica_res <- do.call(gorica, Args)
+    Gorica_res$call <- cl
+    Gorica_res$model <- x
+
+    #if(!is.null(Warnings)){
+    #  Gorica_res$Warnings <- Warnings
+    #}
+    class(Gorica_res) <- c("gorica_lm", class(Gorica_res))
+    Gorica_res
+  }
+
+#' @method gorica mplus.model
+#' @export
+gorica.mplus.model <-
+  function(x,
+           hypothesis,
+           comparison = "unconstrained",
+           ...) {
+
+    cl <- match.call()
+    Args <- as.list(cl[-1])
+    mplus_est <- get_estimates(x)
+    Args$x <- mplus_est$estimate
+    Args$Sigma <- mplus_est$Sigma
+
+    Gorica_res <- do.call(gorica, Args)
+    Gorica_res$call <- cl
+    Gorica_res$model <- x
+
+    #if(!is.null(Warnings)){
+    #  Gorica_res$Warnings <- Warnings
+    #}
+    class(Gorica_res) <- c("gorica_mplus", class(Gorica_res))
+    Gorica_res
+  }
+
+#' @method gorica lavaan
+#' @export
+gorica.lavaan <-
+  function(x,
+           hypothesis,
+           comparison = "unconstrained",
+           ...) {
+
+    cl <- match.call()
+    Args <- as.list(cl[-1])
+    mplus_est <- get_estimates(x)
+    Args$x <- mplus_est$estimate
+    Args$Sigma <- mplus_est$Sigma
+
+    Gorica_res <- do.call(gorica, Args)
+    Gorica_res$call <- cl
+    Gorica_res$model <- x
+
+    #if(!is.null(Warnings)){
+    #  Gorica_res$Warnings <- Warnings
+    #}
+    class(Gorica_res) <- c("gorica_lavaan", class(Gorica_res))
+    Gorica_res
+  }
+
+
+#' @method gorica gorica_estimate
+#' @export
+gorica.gorica_estimate <-
+  function(x,
+           hypothesis,
+           comparison = "unconstrained",
+           ...) {
+
+    cl <- match.call()
+    Args <- as.list(cl[-1])
+
+    Args$x <- x$estimate
+    Args$Sigma <- x$Sigma
+
+    Gorica_res <- do.call(gorica, Args)
+    Gorica_res$call <- cl
+    Gorica_res$model <- x
+
+    #if(!is.null(Warnings)){
+    #  Gorica_res$Warnings <- Warnings
+    #}
+    class(Gorica_res) <- c("gorica_ge", class(Gorica_res))
+    Gorica_res
+  }
+

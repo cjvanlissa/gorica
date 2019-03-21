@@ -30,12 +30,18 @@ compare_hypotheses.ormle <-
     Call <- match.call()
     Call$iter <- NULL
     if (inherits(object, "ormle")) names(orlmlist) <- as.character(Call[-1L])[isorlm]
+    gorica_penalties <- lapply(orlmlist, function(x) gorica_penalty3(x, iter = iter))
     loglik <- -2*sapply(orlmlist, function(x) x$logLik)
-    penalty <- 2*sapply(orlmlist, function(x) gorica_penalty3(x, iter = iter))
+    penalty <- 2*sapply(gorica_penalties, `[[`, "penalty")
     gor <- loglik + penalty
     delta <- gor - min(gor)
     gorica_weights <- exp(-delta/2) / sum(exp(-delta/2))
-    data.frame(misfit = loglik,complexity = penalty,gorica = gor,gorica_weights = round(gorica_weights,4))
+    list(comparisons = data.frame(misfit = loglik,
+               complexity = penalty,
+               gorica = gor,
+               gorica_weights = gorica_weights),
+         gorica_penalties = gorica_penalties
+    )
   }
 
 #' @method compare_hypotheses list
@@ -50,8 +56,9 @@ compare_hypotheses.list <- function(object, ..., iter = 100000){
 #' @importFrom quadprog solve.QP
 gorica_penalty3 <-
   function(object, iter = 100000, mc.cores = 1){
+    K <- length(object$est)
     if(any(object$constr != 0) | object$nec != 0){
-      K <- length(object$est)
+
       Z <- rmvnorm(n = iter, mean = rep(0, K), sigma = object$covmtrx)
       ginvcovm <- ginv(object$covmtrx)
       Dmat2 = 2*ginvcovm
@@ -67,9 +74,10 @@ gorica_penalty3 <-
           length(solveQP2$iact)
         }
       })
-      sum((1:K)*sapply(1:K, function(x) sum(x == (K - nact)))/iter)
+      wt_bar <- sapply(1:K, function(x) sum(x == (K - nact)))/iter
+      list(penalty = sum(1:K*wt_bar), wt_bar = wt_bar)
     } else {
-      length(object$est)
+      list(penalty = length(object$est), wt_bar = c(rep(0, K-1), 1))
     }
 
   }
