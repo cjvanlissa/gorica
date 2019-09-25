@@ -15,7 +15,8 @@ RoxygenNote: 6.1.1
 Depends: 
     R (>= 3.0.0),
     stats,
-    methods
+    methods,
+    bain
 Suggests: 
     MASS,
     testthat,

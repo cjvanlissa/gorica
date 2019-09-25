@@ -32,12 +32,13 @@ get_estimates.lavaan <- function(x, ...){
   Sigma <- lavTech(x, "vcov")
 
 # From Mplus --------------------------------------------------------------
-
-  if(!all(names(param_id) %in% .lavaan_sections[, 1])){
+  ngroups <- lavInspect(x, what = "ngroups")
+  nlevels <- lavInspect(x, what = "nlevels")
+  if(ngroups > 1 | nlevels > 1){
     keep <- lapply(param_id, function(this_group){
       lapply(names(this_group), function(x){
         out <- this_group[[x]] == 0
-        if(x %in% c("theta", "psi", "beta", "gamma")){
+        if(x %in% c("theta", "psi", "gamma")){
           out[upper.tri(out)] <- TRUE
       }
       out
@@ -64,6 +65,13 @@ get_estimates.lavaan <- function(x, ...){
       }
       out
     })
+    #origin_matrix <- unlist(lapply(1:length(param_id), function(x){
+    #  rep(names(param_id)[x], length(param_id[[x]]))
+    #}))
+    origin_matrix <- unlist(lapply(1:length(param_id), function(x){
+      rep(names(param_id)[x], length(param_id[[x]]))
+    }))
+
     estimate_labels <- lapply(names(param_id), function(x){
       label_section(sec = param_id[[x]],
                     pref = .lavaan_sections[.lavaan_sections[, 1] == x, 3],
