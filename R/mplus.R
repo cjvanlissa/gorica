@@ -13,6 +13,35 @@
 #' @method get_estimates mplus.model
 #' @export
 get_estimates.mplus.model <- function(x, ...){
+  estimate <- mplus_partable(x)
+  # Remove duplicates here, for now
+  duplicates <- NULL
+  if(any(duplicated(estimate$id))){
+    dups <- estimate[duplicated(estimate$id), ]
+    estimate <- estimate[!duplicated(estimate$id), ]
+    duplicates <- lapply(unique(dups$id), function(o){dups$label[dups$id == o]})
+    names(duplicates) <- estimate$label[match(unique(dups$id), estimate$id)]
+  }
+  estimate <- estimate[order(estimate$id), ]
+  # End remove duplicates
+  coefs <- estimate$est
+  names(coefs) <- estimate$label
+
+  Sigma <- x$tech3$paramCov[estimate$id, estimate$id]
+  Sigma[upper.tri(Sigma)] <- t(Sigma)[upper.tri(Sigma)]
+
+  colnames(Sigma) <- estimate$label
+  rownames(Sigma) <- estimate$label
+
+  out <- list(estimate = coefs,
+              Sigma = Sigma,
+              partable = estimate)
+  if(!is.null(duplicates)) out[["label_synonyms"]] <- duplicates
+  class(out) <- "gorica_estimate"
+  out
+}
+
+mplus_partable <- function(x, ...){
   techs_missing <- c("tech1" = is.null(x[["tech1"]]), "tech3" = is.null(x[["tech3"]]))
   techs_missing <- sapply(names(techs_missing)[!techs_missing], function(i){!length(x[[i]]) > 0})
   if(any(techs_missing)) stop("Need the ", paste(names(techs_missing)[techs_missing], collapse = " and "), " output in order to derive the covariance matrix of the estimates from Mplus. Please re-run your analysis in Mplus, adding the following syntax:\nOUTPUT: tech1 tech3;")
@@ -50,36 +79,9 @@ get_estimates.mplus.model <- function(x, ...){
   if(anyNA(match_lab)) stop("Could not match parameter estimates to tech1 output: Several estimates were not matched by parameters in tech1.")
 
 
-  estimate <- data.frame(estimate[match_lab, ], id = param_id$id)
+  data.frame(estimate[match_lab, ], id = param_id$id)
   #estimate$label <- gsub("[\\$\\.]", "_", estimate$label)
-
-  duplicates <- NULL
-  if(any(duplicated(estimate$id))){
-    dups <- estimate[duplicated(estimate$id), ]
-    estimate <- estimate[!duplicated(estimate$id), ]
-    duplicates <- lapply(unique(dups$id), function(o){dups$label[dups$id == o]})
-    names(duplicates) <- estimate$label[match(dups$id, estimate$id)]
-  }
-  estimate <- estimate[order(estimate$id), ]
-
-
-
-  coefs <- estimate$est
-  names(coefs) <- estimate$label
-
-  Sigma <- x$tech3$paramCov[estimate$id, estimate$id]
-  Sigma[upper.tri(Sigma)] <- t(Sigma)[upper.tri(Sigma)]
-
-  colnames(Sigma) <- estimate$label
-  rownames(Sigma) <- estimate$label
-
-  out <- list(estimate = coefs,
-              Sigma = Sigma)
-  if(!is.null(duplicates)) out[["label_synonyms"]] <- duplicates
-  class(out) <- "gorica_estimate"
-  out
 }
-
 # tau vector thresholds
 # nu vector means OR intercepts of continuous observed variables
 # lambda matrix factor loadings; rows == dependent; columns == latent
