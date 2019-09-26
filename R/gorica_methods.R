@@ -129,7 +129,7 @@ gorica.default <- function(x,
     if(is.na(comp_arg)) stop("Argument 'comparison' did not match one of the available options: 'unconstrained', 'complement', or 'none'.")
     comparison <- c("unconstrained", "complement", "none")[pmatch(comparison, c("unconstrained", "complement", "none"))]
   }
-
+#browser()
   if(inherits(hypothesis, "character")){
     hyp_params <- params_in_hyp(hypothesis)
     coef_in_hyp <- charmatch(rename_function(hyp_params),
@@ -155,7 +155,7 @@ gorica.default <- function(x,
       stop("Argument 'hypothesis' must either be a character string with inequality constraints, or a list with an element 'hyp_mat', consisting of a list of hypothesis matrices, and and element 'n_ec', consisting of an integer vector with the number of equality constraints for each hypothesis matrix in 'hyp_mat'.")
     }
   }
-
+  #browser()
   hypotheses <- mapply(function(this_hyp, nec_num){
     ormle(x,
           Sigma,
@@ -179,6 +179,7 @@ gorica.default <- function(x,
   }
   res <- compare_hypotheses(hypotheses)
   fit <- res$comparisons
+  #browser()
   if(comparison == "complement"){
     complement <- do.call(comp, c(hypotheses[[1]], wt_bar = res[[1]][[2]]))
     fit <- rbind(fit, complement)
@@ -215,9 +216,9 @@ gorica.htest <-
     stop("To be able to run gorica on the results of an object returned by t.test(), you must first load the 'gorica' package, and then conduct your t.test. The standard t.test does not return group-specific variances and sample sizes, which are required by gorica. When you load the gorica package, the standard t.test is replaced by a version that does return this necessary information.")
   }
 
-#' @method gorica gorica_htest
+#' @method gorica t_test
 #' @export
-gorica.gorica_htest <-
+gorica.t_test <-
   function(x,
            hypothesis,
            comparison = "unconstrained",
@@ -252,7 +253,7 @@ gorica.gorica_htest <-
     Gorica_res <- do.call(gorica, Args)
     Gorica_res$call <- cl
     Gorica_res$model <- x
-    class(Gorica_res) <- c("gorica_htest", class(Gorica_res))
+    class(Gorica_res) <- c("t_test", class(Gorica_res))
     Gorica_res
   }
 
@@ -284,7 +285,7 @@ gorica.lm <-
   }
 
 #' @method gorica mplus.model
-#' @export
+#' @keywords internal
 gorica.mplus.model <-
   function(x,
            hypothesis,
@@ -333,10 +334,34 @@ gorica.lavaan <-
     Gorica_res
   }
 
-
-#' @method gorica gorica_estimate
+#' @method gorica lmerMod
 #' @export
-gorica.gorica_estimate <-
+gorica.lmerMod <-
+  function(x,
+           hypothesis,
+           comparison = "unconstrained",
+           ...) {
+
+    cl <- match.call()
+    Args <- as.list(cl[-1])
+
+    Args$x <- fixef(x)
+    Args$Sigma <- vcov(x)
+
+    Gorica_res <- do.call(gorica, Args)
+    Gorica_res$call <- cl
+    Gorica_res$model <- x
+
+    #if(!is.null(Warnings)){
+    #  Gorica_res$Warnings <- Warnings
+    #}
+    class(Gorica_res) <- c("gorica_lmerMod", class(Gorica_res))
+    Gorica_res
+  }
+
+#' @method gorica model_estimates
+#' @export
+gorica.model_estimates <-
   function(x,
            hypothesis,
            comparison = "unconstrained",
@@ -355,7 +380,7 @@ gorica.gorica_estimate <-
     #if(!is.null(Warnings)){
     #  Gorica_res$Warnings <- Warnings
     #}
-    class(Gorica_res) <- c("gorica_ge", class(Gorica_res))
+    class(Gorica_res) <- c("gorica_model_estimates", class(Gorica_res))
     Gorica_res
   }
 

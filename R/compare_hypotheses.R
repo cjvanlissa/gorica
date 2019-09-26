@@ -52,11 +52,12 @@ compare_hypotheses.list <- function(object, ..., iter = 100000){
 #' @importFrom mvtnorm rmvnorm
 #' @importFrom quadprog solve.QP
 gorica_penalty3 <-
-  function(object, iter = 100000, mc.cores = 1){
+  function(object, iter = 100000){
     K <- length(object$est)
     if(any(object$constr != 0) | object$nec != 0){
 
       Z <- rmvnorm(n = iter, mean = rep(0, K), sigma = object$covmtrx)
+      #browser()
       ginvcovm <- ginv(object$covmtrx)
       Dmat2 = 2*ginvcovm
 
@@ -74,7 +75,7 @@ gorica_penalty3 <-
       wt_bar <- sapply(1:K, function(x) sum(x == (K - nact)))/iter
       list(penalty = sum(1:K*wt_bar), wt_bar = wt_bar)
     } else {
-      list(penalty = length(object$est), wt_bar = c(rep(0, K-1), 1))
+      list(penalty = K, wt_bar = c(rep(0, K-1), 1))
     }
 
   }
