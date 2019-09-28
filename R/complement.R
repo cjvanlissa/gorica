@@ -33,16 +33,16 @@ comp <-
     # check if any constraint is violated
     if (check.ciq || check.ceq) {
       llc <-
-        gorica:::ormle(
-          x,
+        ormle(
+          est, # was x
           covmtrx,
-          const = matrix(c(rep(0, length(
-            x
+          constr = matrix(c(rep(0, length(
+            est #was x
           ))), nrow = 1),
           nec = 0,
           rhs = 0
         )$logLik
-      betasc <- x
+      betasc <- est #was x
       # if any constraints is violated LL_c = LL_u
     } else if (nrow(constr) > nec && !(all(c(constr) == 0L))) {
       # number of rows
@@ -55,7 +55,7 @@ comp <-
       gorica_list <- lapply(nr, function(l) {
         idx <- c(nr[l], nr[-l])
         constrx <- constr[idx, , drop = FALSE]
-        gorica:::ormle(est,
+        ormle(est,
                        covmtrx,
                        constr = constrx,
                        rhs = rhs[idx],
@@ -75,16 +75,16 @@ comp <-
       # in case of equality constraints only, the complement is
       # equal to the unconstrained log-likelihood
       llc <-
-        gorica:::ormle(
-          x,
+        ormle(
+          est, #was x
           covmtrx,
-          const = matrix(c(rep(0, length(
-            x
+          constr = matrix(c(rep(0, length(
+            est #was x
           ))), nrow = 1),
           nec = 0,
           rhs = 0
         )$logLik
-      betasc <- x
+      betasc <- est # was x
     } else if (all(c(constr) == 0L)) {
       # unconstrained setting
       stop("Restriktor ERROR: no complement exists for the unrestricted hypothesis.")

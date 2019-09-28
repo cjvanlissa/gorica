@@ -27,6 +27,8 @@ DETAILS
   #Model fitting
   model <- glm(num_awards ~ -1+prog + math + prog * math, family = "poisson",
                data = academic_awards)
-  new_gor <- gorica(x = model, hypothesis = "math=0&math+progGeneral:math=0&math+progVocational:math=0;progGeneral:math > progVocational:math&progVocational:math>0; progVocational:math<0")
+  new_gor <- gorica(x = model, hypothesis = "math=0&math+progGeneral:math=0&
+  math+progVocational:math=0;progGeneral:math > progVocational:math&
+  progVocational:math>0; progVocational:math<0")
 }
 }

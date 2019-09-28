@@ -25,7 +25,7 @@ constr <- matrix(c(1, 0, 0,
 1, 0, 1), nrow = 3, ncol = 3, byrow = TRUE)
 rhs <- rep(0, 3)
 nec <- 3
-H1 <- ormle(est = strest, covmtrx = strcovmtrx, const = constr, nec = nec, rhs = rhs)
+H1 <- ormle(est = strest, covmtrx = strcovmtrx, constr = constr, nec = nec, rhs = rhs)
 
 H1_char <- "zmath = 0 & zmath + progGeneral:zmath = 0 & zmath + progVocational:zmath =0"
 parsed_hyp1 <- bain:::parse_hypothesis(names(strest), H1_char)
@@ -41,7 +41,7 @@ constr <- matrix(c(0, 1, -1,
 0, 0, 1), nrow = 2, ncol = 3, byrow = TRUE)
 rhs <- rep(0, 2)
 nec <- 0
-H2 <- ormle(est = strest, covmtrx = strcovmtrx, const = constr, nec = nec, rhs = rhs)
+H2 <- ormle(est = strest, covmtrx = strcovmtrx, constr = constr, nec = nec, rhs = rhs)
 H2_char <- "progGeneral:zmath > progVocational:zmath & progVocational:zmath > 0"
 
 parsed_hyp2 <- bain:::parse_hypothesis(names(strest), H2_char)
@@ -57,7 +57,7 @@ test_that("Parsed H2 correct", {
 constr <- matrix(c(0, 0, -1), nrow = 1, ncol = 3, byrow = TRUE)
 rhs <- rep(0, 1)
 nec <- 0
-H3 <- ormle(est = strest, covmtrx = strcovmtrx, const = constr, nec = nec, rhs = rhs)
+H3 <- ormle(est = strest, covmtrx = strcovmtrx, constr = constr, nec = nec, rhs = rhs)
 H3_char <- "progVocational:zmath < 0"
 
 parsed_hyp3 <- bain:::parse_hypothesis(names(strest), H3_char)
@@ -73,30 +73,28 @@ test_that("Parsed H3 correct", {
 constr <- matrix(c(rep(0, 3)), nrow = 1, ncol = 3, byrow = TRUE)
 rhs <- rep(0, 1)
 nec <- 0
-Hu <- ormle(est = strest, covmtrx = strcovmtrx, const = constr, nec = nec, rhs = rhs)
+Hu <- ormle(est = strest, covmtrx = strcovmtrx, constr = constr, nec = nec, rhs = rhs)
 
 set.seed(111)
-# Source code in gorica is reached, which is saved in the file "Gorica.txt"
-
 
 #Performing gorica to obtain the values of misfit, complexity, GORICA, and GORICA weights
 man_gorica <- gorica:::compare_hypotheses(H1, H2, H3, Hu, iter = 100000)
 
-res_gorica <- gorica(model, paste(H1_char, H2_char, H3_char, sep = ";"), iter = 100000)
+res_gorica <- gorica(model, "zmath = 0 & zmath + progGeneral:zmath = 0 & zmath + progVocational:zmath =0; progGeneral:zmath > progVocational:zmath & progVocational:zmath > 0; progVocational:zmath < 0", iter = 100000)
 
 test_that("Manual and package version yield same loglik", {
-  expect_equivalent(man_gorica$comparisons$loglik, res_gorica$fit$loglik)
+  expect_equivalent(man_gorica$comparisons$loglik, res_gorica$fit$loglik, tolerance = .01)
 })
 
 test_that("Manual and package version yield same penalty", {
-  expect_equivalent(man_gorica$comparisons$penalty, res_gorica$fit$penalty)
+  expect_equivalent(man_gorica$comparisons$penalty, res_gorica$fit$penalty, tolerance = .01)
 })
 
 test_that("Manual and package version yield same gorica", {
-  expect_equivalent(man_gorica$comparisons$gorica, res_gorica$fit$gorica)
+  expect_equivalent(man_gorica$comparisons$gorica, res_gorica$fit$gorica, tolerance = .01)
 })
 
 test_that("Manual and package version yield same weights", {
   expect_equivalent(gorica:::compute_weights(man_gorica$comparisons$gorica),
-                    gorica:::compute_weights(res_gorica$fit)$gorica_weights)
+                    gorica:::compute_weights(res_gorica$fit$gorica), tolerance = .01)
 })

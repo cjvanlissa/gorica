@@ -13,15 +13,22 @@ data("wechsler")
 
 #Specification of the variables and the model
 SEM.model <- '
+Cry = ~ y1 + c(a, a)*y2 + y3 + y4
+Fld = ~ y2 + y3 + y5 + y6 + y7 + y8
+Cry ~ edc + age
+Fld ~ edc + age
+'
+SEM.model <- '
 Cry = ~ y1 + y2 + y3 + y4
 Fld = ~ y2 + y3 + y5 + y6 + y7 + y8
 Cry ~ edc + age
 Fld ~ edc + age
 '
 
-
+wechsler$sex <- factor(c(rep("Boy", 1680/2), rep("Girl", 1680/2)))
 #Model fitting
-fit <- cfa(SEM.model, data = wechsler, std.lv = TRUE)
+x <- cfa(SEM.model, data = wechsler, std.lv = TRUE)
+x <- fit <- cfa(SEM.model, data = wechsler, std.lv = TRUE, group = "sex")
 
 
 ##############################################################

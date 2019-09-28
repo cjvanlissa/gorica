@@ -24,6 +24,9 @@
 #' }
 #' @param hypothesis A character string containing the informative hypotheses to
 #' evaluate (see Details).
+#' @param comparison A character string indicating what the \code{hypothesis}
+#' should be compared to. Defaults to \code{comparison = "unconstrained"};
+#' options include \code{c("unconstrained", "complement", "none")}.
 #' @param ... Additional arguments (see Details).
 #'
 #' @details
@@ -120,6 +123,19 @@ gorica.default <- function(x,
 )
 {
   cl <- match.call()
+  Goricares <- list(
+    fit = NULL,
+    call = cl,
+    model = x,
+    estimates = x,
+    Sigma = Sigma,
+    comparison = comparison
+  )
+  names(x) <- rename_function(names(x))
+  Sigma <- lapply(Sigma, function(i){
+    colnames(i) <- rownames(i) <- names(x)
+    i
+  })
   # Parse hypotheses --------------------------------------------------------
   #ren_estimate <- rename_estimate(x)
   if(!inherits(comparison, "character")|length(comparison) > 1){
@@ -129,8 +145,8 @@ gorica.default <- function(x,
     if(is.na(comp_arg)) stop("Argument 'comparison' did not match one of the available options: 'unconstrained', 'complement', or 'none'.")
     comparison <- c("unconstrained", "complement", "none")[pmatch(comparison, c("unconstrained", "complement", "none"))]
   }
-#browser()
   if(inherits(hypothesis, "character")){
+    hypothesis <- rename_function(hypothesis)
     hyp_params <- params_in_hyp(hypothesis)
     coef_in_hyp <- charmatch(rename_function(hyp_params),
                              rename_function(names(x)))
@@ -147,6 +163,12 @@ gorica.default <- function(x,
            "\n  The parameters in object 'x' are named: ",
            paste(names(x), collapse = ", "))
     }
+    # Drop parameters not in hypothesis
+    x <- x[coef_in_hyp]
+    Sigma <- lapply(Sigma, function(i){
+      i[coef_in_hyp, coef_in_hyp]
+    })
+
     hypothesis <- parse_hypothesis(names(x), hypothesis)
   } else {
     if(inherits(hypothesis, "list") & !is.null(hypothesis[["hyp_mat"]]) & !is.null(hypothesis[["n_ec"]])){
@@ -156,6 +178,7 @@ gorica.default <- function(x,
     }
   }
   #browser()
+  #use_these_estimates <- x[coef_in_hyp]
   hypotheses <- mapply(function(this_hyp, nec_num){
     ormle(x,
           Sigma,
@@ -171,7 +194,7 @@ gorica.default <- function(x,
     hypotheses <- c(hypotheses,
                     list(ormle(est = x,
                                covmtrx = Sigma,
-                               const = matrix(c(rep(0, length(x))), nrow = 1),
+                               constr = matrix(c(rep(0, length(x))), nrow = 1),
                                nec = 0,
                                rhs = 0)
                     ))
@@ -187,19 +210,8 @@ gorica.default <- function(x,
   }
 
   fit$gorica_weights <- compute_weights(fit$gorica)
-
-  Goricares <- list(
-    fit = fit,
-    #BFmatrix = BFmatrix,
-    #b = b,
-
-    call = cl,
-    model = x,
-    hypotheses = hyp,
-    #independent_restrictions = rank_hyp,
-    estimates = x#,
-    #n = n
-  )
+browser()
+  Goricares[c("fit", "hypotheses")] <- list(fit, hyp)
   class(Goricares) <- "gorica"
   Goricares
 }
@@ -315,11 +327,12 @@ gorica.lavaan <-
   function(x,
            hypothesis,
            comparison = "unconstrained",
+           standardize = FALSE,
            ...) {
 
     cl <- match.call()
     Args <- as.list(cl[-1])
-    mplus_est <- get_estimates(x)
+    mplus_est <- get_estimates(x, standardize)
     Args$x <- mplus_est$estimate
     Args$Sigma <- mplus_est$Sigma
 

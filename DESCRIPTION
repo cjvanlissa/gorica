@@ -5,7 +5,15 @@ Title: Evaluation of Inequality Constrained Hypotheses Using Generalized AIC
 Version: 0.1.0
 Author: Caspar van Lissa, Yasin Altinisik, Rebecca M. Kuiper
 Maintainer: Caspar J. van Lissa <c.j.vanlissa@uu.nl>
-Description: write me
+Description: Implements the generalized order-restricted information criterion
+    approximation (GORICA). The GORICA can be utilized to evaluate (in)equality
+    constrained hypotheses. The GORICA is applicable not only to normal linear
+    models, but also to generalized linear models (GLMs), generalized linear
+    mixed models (GLMMs), and structural equation models (SEMs). In addition,
+    the GORICA can be utilized in the context of contingency tables for which
+    (in)equality constrained hypotheses do not necessarily contain linear
+    restrictions on cell probabilities, but instead often contain non-linear
+    restrictions on cell probabilities.
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
@@ -15,10 +23,12 @@ RoxygenNote: 6.1.1
 Depends: 
     R (>= 3.0.0),
     stats,
-    methods,
     bain
 Imports: 
     MASS,
-    testthat,
     mvtnorm,
-    quadprog
+    quadprog,
+    lme4
+Suggests:
+    testthat,
+    lavaan

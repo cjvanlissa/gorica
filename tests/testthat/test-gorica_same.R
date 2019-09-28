@@ -103,7 +103,7 @@ constr <- matrix(c(1, 0, 0,
                    1, 0, 1), nrow = 3, ncol = 3, byrow = TRUE)
 rhs <- rep(0, 3)
 nec <- 3
-H1 <- ormle(est = strest, covmtrx = strcovmtrx, const = constr, nec = nec, rhs = rhs)
+H1 <- ormle(est = strest, covmtrx = strcovmtrx, constr = constr, nec = nec, rhs = rhs)
 
 H1_char <- "zmath = 0 & zmath + progGeneral:zmath = 0 & zmath + progVocational:zmath =0"
 
@@ -112,7 +112,7 @@ constr <- matrix(c(0, 1, -1,
                    0, 0, 1), nrow = 2, ncol = 3, byrow = TRUE)
 rhs <- rep(0, 2)
 nec <- 0
-H2 <- ormle(est = strest, covmtrx = strcovmtrx, const = constr, nec = nec, rhs = rhs)
+H2 <- ormle(est = strest, covmtrx = strcovmtrx, constr = constr, nec = nec, rhs = rhs)
 H2_char <- "progGeneral:zmath > progVocational:zmath & progVocational:zmath > 0"
 
 
@@ -120,14 +120,14 @@ H2_char <- "progGeneral:zmath > progVocational:zmath & progVocational:zmath > 0"
 constr <- matrix(c(0, 0, -1), nrow = 1, ncol = 3, byrow = TRUE)
 rhs <- rep(0, 1)
 nec <- 0
-H3 <- ormle(est = strest, covmtrx = strcovmtrx, const = constr, nec = nec, rhs = rhs)
+H3 <- ormle(est = strest, covmtrx = strcovmtrx, constr = constr, nec = nec, rhs = rhs)
 H3_char <- "progVocational:zmath < 0"
 
 # The unconstrained hypothesis
 constr <- matrix(c(rep(0, 3)), nrow = 1, ncol = 3, byrow = TRUE)
 rhs <- rep(0, 1)
 nec <- 0
-Hu <- ormle(est = strest, covmtrx = strcovmtrx, const = constr, nec = nec, rhs = rhs)
+Hu <- ormle(est = strest, covmtrx = strcovmtrx, constr = constr, nec = nec, rhs = rhs)
 
 set.seed(111)
 # Source code in gorica is reached, which is saved in the file "Gorica.txt"
@@ -137,8 +137,8 @@ set.seed(111)
 man_gorica <- gorica:::compare_hypotheses(H1, H2, H3, Hu, iter = 100000)
 
 original_gorica <- tmp_gorica(H1, H2, H3, Hu, iter = 100000)
-
-res_gorica <- gorica(model, paste(H1_char, H2_char, H3_char, sep = ";"), iter = 100000)
+pasted_hyp <- paste(H1_char, H2_char, H3_char, sep = ";")
+res_gorica <- gorica(model, "zmath = 0 & zmath + progGeneral:zmath = 0 & zmath + progVocational:zmath =0;progGeneral:zmath > progVocational:zmath & progVocational:zmath > 0;progVocational:zmath < 0", iter = 100000)
 
 test_that("Original and manual gorica same", {
   expect_equivalent(original_gorica$gorica, man_gorica$comparisons$gorica, tolerance = .01)

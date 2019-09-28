@@ -24,6 +24,10 @@ be referred to in \code{hypotheses}.
 \item{hypothesis}{A character string containing the informative hypotheses to
 evaluate (see Details).}
 
+\item{comparison}{A character string indicating what the \code{hypothesis}
+should be compared to. Defaults to \code{comparison = "unconstrained"};
+options include \code{c("unconstrained", "complement", "none")}.}
+
 \item{...}{Additional arguments (see Details).}
 }
 \value{

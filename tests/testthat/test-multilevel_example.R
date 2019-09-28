@@ -29,7 +29,7 @@ constr <- matrix(c(1, 0, 0, 0, 0,
 0, 1, 0, 0, 1), nrow = 5, ncol = 5, byrow = TRUE)
 rhs <- rep(0, 5)
 nec <- 2
-H1 <- ormle(est = strest, covmtrx = strcovmtrx, const = constr, nec = nec, rhs = rhs)
+H1 <- ormle(est = strest, covmtrx = strcovmtrx, constr = constr, nec = nec, rhs = rhs)
 
 H1_char <- "zage = 0 & zage + zage:genderMale = 0 & zgevocab > 0 & zage:zgevocab > 0 & zgevocab+zgevocab:genderMale > 0"
 parsed_hyp1 <- bain:::parse_hypothesis(names(strest), H1_char)
@@ -48,7 +48,7 @@ constr <- matrix(c(-1, 0, 0, 0, 0,
 0, 1, 0, 0, 1), nrow = 5, ncol = 5, byrow = TRUE)
 rhs <- rep(0, 5)
 nec <- 0
-H2 <- ormle(est = strest, covmtrx = strcovmtrx, const = constr, nec = nec, rhs = rhs)
+H2 <- ormle(est = strest, covmtrx = strcovmtrx, constr = constr, nec = nec, rhs = rhs)
 
 H2_char <- "zage < 0 & zgevocab > 0 & zage:zgevocab > 0 & zage+zage:genderMale < 0&zgevocab+zgevocab:genderMale > 0"
 
@@ -68,14 +68,7 @@ constr <- matrix(c(0, 0, 1, 0, 0,
 0, -1, 0, 0, -1), nrow = 5, ncol = 5, byrow = TRUE)
 rhs <- rep(0,5)
 nec <- 1
-H3 <- ormle(est = strest, covmtrx = strcovmtrx, const = constr, nec = nec, rhs = rhs)
-
-# The unconstrained hypothesis
-constr <- matrix(c(rep(0, 5)), nrow = 1, ncol = 5, byrow = TRUE)
-rhs <- rep(0, 1)
-nec <- 0
-Hu <- ormle(est = strest, covmtrx = strcovmtrx, const = constr, nec = nec, rhs = rhs)
-
+H3 <- ormle(est = strest, covmtrx = strcovmtrx, constr = constr, nec = nec, rhs = rhs)
 
 H3_char <- "zage:zgevocab = 0 & zage > 0 & zgevocab > 0 & zage + zage:genderMale < 0 & zgevocab + zgevocab:genderMale < 0 "
 
@@ -87,28 +80,34 @@ test_that("Parsed H3 correct", {
   expect_equivalent(nec, parsed_hyp3$n_ec)
 })
 
+# The unconstrained hypothesis
+constr <- matrix(c(rep(0, 5)), nrow = 1, ncol = 5, byrow = TRUE)
+rhs <- rep(0, 1)
+nec <- 0
+Hu <- ormle(est = strest, covmtrx = strcovmtrx, constr = constr, nec = nec, rhs = rhs)
+
 
 set.seed(111)
 
 #Performing gorica to obtain the values of misfit, complexity, GORICA, and GORICA weights
 man_gorica <- gorica:::compare_hypotheses(H1, H2, H3, Hu, iter = 100000)
 
-res_gorica <- gorica(model, paste(H1_char, H2_char, H3_char, sep = ";"), iter = 100000)
+res_gorica <- gorica(model, "zage = 0 & zage + zage:genderMale = 0 & zgevocab > 0 & zage:zgevocab > 0 & zgevocab+zgevocab:genderMale > 0; zage < 0 & zgevocab > 0 & zage:zgevocab > 0 & zage+zage:genderMale < 0&zgevocab+zgevocab:genderMale > 0; zage:zgevocab = 0 & zage > 0 & zgevocab > 0 & zage + zage:genderMale < 0 & zgevocab + zgevocab:genderMale < 0 ", iter = 100000)
 
 test_that("Manual and package version yield same loglik", {
   expect_equivalent(man_gorica$comparisons$loglik, res_gorica$fit$loglik)
 })
 
 test_that("Manual and package version yield same penalty", {
-  expect_equivalent(man_gorica$comparisons$penalty, res_gorica$fit$penalty)
+  expect_equivalent(man_gorica$comparisons$penalty, res_gorica$fit$penalty, tolerance = .01)
 })
 
 test_that("Manual and package version yield same gorica", {
-  expect_equivalent(man_gorica$comparisons$gorica, res_gorica$fit$gorica)
+  expect_equivalent(man_gorica$comparisons$gorica, res_gorica$fit$gorica, tolerance = .02)
 })
 
 test_that("Manual and package version yield same weights", {
   expect_equivalent(gorica:::compute_weights(man_gorica$comparisons$gorica),
-                    gorica:::compute_weights(res_gorica$fit)$gorica_weights)
+                    gorica:::compute_weights(res_gorica$fit$gorica), tolerance = .01)
 })
 

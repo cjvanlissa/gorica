@@ -10,7 +10,9 @@
 #'   #Model fitting
 #'   model <- glm(num_awards ~ -1+prog + math + prog * math, family = "poisson",
 #'                data = academic_awards)
-#'   new_gor <- gorica(x = model, hypothesis = "math=0&math+progGeneral:math=0&math+progVocational:math=0;progGeneral:math > progVocational:math&progVocational:math>0; progVocational:math<0")
+#'   new_gor <- gorica(x = model, hypothesis = "math=0&math+progGeneral:math=0&
+#'   math+progVocational:math=0;progGeneral:math > progVocational:math&
+#'   progVocational:math>0; progVocational:math<0")
 #' }
 #' @export
 compare_hypotheses <-
@@ -33,6 +35,7 @@ compare_hypotheses.ormle <-
     gorica_penalties <- lapply(orlmlist, function(x) gorica_penalty3(x, iter = iter))
     loglik <- sapply(orlmlist, function(x) x$logLik)
     penalty <- sapply(gorica_penalties, `[[`, "penalty")
+    #browser()
     gor <- -2*loglik + 2*penalty
     list(comparisons = data.frame(loglik = loglik,
                penalty = penalty,

@@ -1,5 +1,5 @@
 #' @importFrom utils getFromNamespace
-#' @importFrom bain t_test
+#' @import bain
 parse_hypothesis <- getFromNamespace("parse_hypothesis", "bain")
 constraint_to_equation <- getFromNamespace("constraint_to_equation", "bain")
 constraint_to_row <- getFromNamespace("constraint_to_row", "bain")
