@@ -28,7 +28,7 @@ Imports:
     MASS,
     mvtnorm,
     quadprog,
-    lme4
-Suggests:
-    testthat,
+    lme4,
     lavaan
+Suggests:
+    testthat

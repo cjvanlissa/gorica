@@ -111,15 +111,15 @@ test_that("Manual and package version yield same loglik", {
 })
 
 test_that("Manual and package version yield same penalty", {
-  expect_equivalent(man_gorica$comparisons$penalty, res_gorica$fit$penalty)
+  expect_equivalent(man_gorica$comparisons$penalty, res_gorica$fit$penalty, tolerance = .005)
 })
 
 test_that("Manual and package version yield same gorica", {
-  expect_equivalent(man_gorica$comparisons$gorica, res_gorica$fit$gorica)
+  expect_equivalent(man_gorica$comparisons$gorica, res_gorica$fit$gorica, tolerance = .006)
 })
 
 test_that("Manual and package version yield same weights", {
   expect_equivalent(gorica:::compute_weights(man_gorica$comparisons$gorica),
-                    gorica:::compute_weights(res_gorica$fit)$gorica_weights)
+                    res_gorica$fit$gorica_weights, tolerance = .005)
 })
 

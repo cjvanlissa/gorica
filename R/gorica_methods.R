@@ -131,11 +131,9 @@ gorica.default <- function(x,
     Sigma = Sigma,
     comparison = comparison
   )
+  if(is.list(Sigma) & length(Sigma) == 1) Sigma <- Sigma[[1]]
   names(x) <- rename_function(names(x))
-  Sigma <- lapply(Sigma, function(i){
-    colnames(i) <- rownames(i) <- names(x)
-    i
-  })
+  colnames(Sigma) <- rownames(Sigma) <- names(x)
   # Parse hypotheses --------------------------------------------------------
   #ren_estimate <- rename_estimate(x)
   if(!inherits(comparison, "character")|length(comparison) > 1){
@@ -165,9 +163,7 @@ gorica.default <- function(x,
     }
     # Drop parameters not in hypothesis
     x <- x[coef_in_hyp]
-    Sigma <- lapply(Sigma, function(i){
-      i[coef_in_hyp, coef_in_hyp]
-    })
+    Sigma <- Sigma[coef_in_hyp, coef_in_hyp]
 
     hypothesis <- parse_hypothesis(names(x), hypothesis)
   } else {
@@ -177,8 +173,6 @@ gorica.default <- function(x,
       stop("Argument 'hypothesis' must either be a character string with inequality constraints, or a list with an element 'hyp_mat', consisting of a list of hypothesis matrices, and and element 'n_ec', consisting of an integer vector with the number of equality constraints for each hypothesis matrix in 'hyp_mat'.")
     }
   }
-  #browser()
-  #use_these_estimates <- x[coef_in_hyp]
   hypotheses <- mapply(function(this_hyp, nec_num){
     ormle(x,
           Sigma,
@@ -202,7 +196,7 @@ gorica.default <- function(x,
   }
   res <- compare_hypotheses(hypotheses)
   fit <- res$comparisons
-  #browser()
+
   if(comparison == "complement"){
     complement <- do.call(comp, c(hypotheses[[1]], wt_bar = res[[1]][[2]]))
     fit <- rbind(fit, complement)
@@ -210,7 +204,7 @@ gorica.default <- function(x,
   }
 
   fit$gorica_weights <- compute_weights(fit$gorica)
-browser()
+
   Goricares[c("fit", "hypotheses")] <- list(fit, hyp)
   class(Goricares) <- "gorica"
   Goricares
