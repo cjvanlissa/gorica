@@ -125,14 +125,56 @@
 #' Utrecht University). ISBN: 978-90-393-6918-0.
 #' \url{https://dspace.library.uu.nl/handle/1874/360604}
 #' @examples
+#' \dontshow{
+#' # EXAMPLE 1. One-sample t test
+#' ttest1 <- t_test(iris$Sepal.Length,mu=5)
+#' gorica(ttest1,"x<5.8", iterations = 5)
+#'
+#' # EXAMPLE 2. ANOVA
+#' aov1 <- aov(yield ~ block-1 + N * P + K, npk)
+#' gorica(aov1,hypothesis="block1=block5;
+#'    K1<0", iterations = 5)
+#'
+#' # EXAMPLE 3. gml
+#' counts <- c(18,17,15,20,10,20,25,13,12)
+#' outcome <- gl(3,1,9)
+#' treatment <- gl(3,3)
+#' fit <- glm(counts ~ outcome-1 + treatment, family = poisson())
+#' gorica(fit, "outcome1 > (outcome2, outcome3)", iterations = 5)
+#'
+#' # EXAMPLE 4. ANOVA
+#' res <- lm(Sepal.Length ~ Species-1, iris)
+#' est <- get_estimates(res)
+#' est
+#' gor <- gorica(res, "Speciessetosa < (Speciesversicolor, Speciesvirginica)",
+#' comparison = "complement", iterations = 5)
+#' gor
+#' }
+#' \donttest{
+#' # EXAMPLE 1. One-sample t test
+#' ttest1 <- t_test(iris$Sepal.Length,mu=5)
+#' gorica(ttest1,"x<5.8")
+#'
+#' # EXAMPLE 2. ANOVA
+#' aov1 <- aov(yield ~ block-1 + N * P + K, npk)
+#' gorica(aov1,hypothesis="block1=block5;
+#'    K1<0")
+#'
+#' # EXAMPLE 3. gml
+#' counts <- c(18,17,15,20,10,20,25,13,12)
+#' outcome <- gl(3,1,9)
+#' treatment <- gl(3,3)
+#' fit <- glm(counts ~ outcome-1 + treatment, family = poisson())
+#' gorica(fit, "outcome1 > (outcome2, outcome3)")
+#'
+#' # EXAMPLE 4. ANOVA
 #' res <- lm(Sepal.Length ~ Species-1, iris)
 #' est <- get_estimates(res)
 #' est
 #' gor <- gorica(res, "Speciessetosa < (Speciesversicolor, Speciesvirginica)",
 #' comparison = "complement")
 #' gor
-#' gor <- gorica(res, "Speciessetosa > (Speciesversicolor, Speciesvirginica)")
-#' gor
+#' }
 #' @rdname gorica
 #' @export
 #' @importFrom stats as.formula coef complete.cases cov lm model.frame
@@ -160,6 +202,7 @@ gorica.default <- function(x,
     Sigma = Sigma,
     comparison = comparison
   )
+
   if(is.list(Sigma) & length(Sigma) == 1) Sigma <- Sigma[[1]]
   names(x) <- rename_function(names(x))
   colnames(Sigma) <- rownames(Sigma) <- names(x)
@@ -175,9 +218,8 @@ gorica.default <- function(x,
   if(inherits(hypothesis, "character")){
     hypothesis <- rename_function(hypothesis)
     hyp_params <- params_in_hyp(hypothesis)
-    coef_in_hyp <- charmatch(rename_function(hyp_params),
-                             rename_function(names(x)))
-
+    coef_in_hyp <- sort(unique(charmatch(rename_function(hyp_params),
+                             rename_function(names(x)))))
     if(anyNA(coef_in_hyp)){
       stop("Some of the parameters referred to in the 'hypothesis' do not correspond to parameter names of object 'x'.\n  The following parameter names in the 'hypothesis' did not match any parameters in 'x': ",
            paste(hyp_params[is.na(coef_in_hyp)], collapse = ", "),
@@ -223,7 +265,7 @@ gorica.default <- function(x,
                     ))
     hyp <- c(hyp, "Hu")
   }
-  res <- compare_hypotheses(hypotheses)
+  res <- compare_hypotheses(hypotheses, ...)
   fit <- res$comparisons
 
   if(comparison == "complement"){
@@ -262,15 +304,13 @@ gorica.t_test <-
     Args <- as.list(cl[-1])
 
     Args$x <- x$estimate
-    Args$n <- x$n
+    #Args$n <- x$n
 
     if(length(x$estimate) == 1){
-      Args$Sigma <- x$v/x$n
-      Args$group_parameters <- 0
-      Args$joint_parameters <- 1
+      Args$Sigma <- list(matrix(x$v/x$n))
     } else {
       if (!x$method == " Two Sample t-test") {
-        Args$Sigma <- lapply(x$v/x$n, as.matrix)
+        Args$Sigma <- list(diag(x$v/x$n)) #lapply(x$v/x$n, as.matrix)
       } else {
         df <- sum(x$n) - 2
         v <- 0
@@ -279,10 +319,8 @@ gorica.t_test <-
         if (x$n[2] > 1)
           v <- v + (x$n[2] - 1) * x$v[2]
         v <- v/df
-        Args$Sigma <- lapply(v / x$n, as.matrix)
+        Args$Sigma <- list(diag(v / x$n)) #lapply(v / x$n, as.matrix)
       }
-      Args$group_parameters <- 1
-      Args$joint_parameters <- 0
     }
 
     Gorica_res <- do.call(gorica, Args)
@@ -304,7 +342,7 @@ gorica.lm <-
 
     cl <- match.call()
     Args <- as.list(cl[-1])
-
+    if(!is.null(Args[["standardize"]])) warning("Cannot standardize an object of class 'lm'. Using unstandardized coefficients.")
     Args$x <- coef(x)
     Args$Sigma <- vcov(x)
 
@@ -352,13 +390,12 @@ gorica.lavaan <-
            comparison = "unconstrained",
            standardize = FALSE,
            ...) {
-
     cl <- match.call()
     Args <- as.list(cl[-1])
     mplus_est <- get_estimates(x, standardize)
     Args$x <- mplus_est$estimate
     Args$Sigma <- mplus_est$Sigma
-
+    Args$hypothesis <- force(hypothesis)
     Gorica_res <- do.call(gorica, Args)
     Gorica_res$call <- cl
     Gorica_res$model <- x

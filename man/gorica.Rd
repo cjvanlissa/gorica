@@ -127,14 +127,56 @@ hypotheses specified are possible. If not, \code{gorica} will either return an
 error message or render an output table containing \code{Inf}'s.
 }
 \examples{
+\dontshow{
+# EXAMPLE 1. One-sample t test
+ttest1 <- t_test(iris$Sepal.Length,mu=5)
+gorica(ttest1,"x<5.8", iterations = 5)
+
+# EXAMPLE 2. ANOVA
+aov1 <- aov(yield ~ block-1 + N * P + K, npk)
+gorica(aov1,hypothesis="block1=block5;
+   K1<0", iterations = 5)
+
+# EXAMPLE 3. gml
+counts <- c(18,17,15,20,10,20,25,13,12)
+outcome <- gl(3,1,9)
+treatment <- gl(3,3)
+fit <- glm(counts ~ outcome-1 + treatment, family = poisson())
+gorica(fit, "outcome1 > (outcome2, outcome3)", iterations = 5)
+
+# EXAMPLE 4. ANOVA
+res <- lm(Sepal.Length ~ Species-1, iris)
+est <- get_estimates(res)
+est
+gor <- gorica(res, "Speciessetosa < (Speciesversicolor, Speciesvirginica)",
+comparison = "complement", iterations = 5)
+gor
+}
+\donttest{
+# EXAMPLE 1. One-sample t test
+ttest1 <- t_test(iris$Sepal.Length,mu=5)
+gorica(ttest1,"x<5.8")
+
+# EXAMPLE 2. ANOVA
+aov1 <- aov(yield ~ block-1 + N * P + K, npk)
+gorica(aov1,hypothesis="block1=block5;
+   K1<0")
+
+# EXAMPLE 3. gml
+counts <- c(18,17,15,20,10,20,25,13,12)
+outcome <- gl(3,1,9)
+treatment <- gl(3,3)
+fit <- glm(counts ~ outcome-1 + treatment, family = poisson())
+gorica(fit, "outcome1 > (outcome2, outcome3)")
+
+# EXAMPLE 4. ANOVA
 res <- lm(Sepal.Length ~ Species-1, iris)
 est <- get_estimates(res)
 est
 gor <- gorica(res, "Speciessetosa < (Speciesversicolor, Speciesvirginica)",
 comparison = "complement")
 gor
-gor <- gorica(res, "Speciessetosa > (Speciesversicolor, Speciesvirginica)")
-gor
+}
 }
 \references{
 Kuiper, R. M., Hoijtink, H., & Silvapulle, M. J. (2012).

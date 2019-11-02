@@ -2,7 +2,7 @@
 #' @description FUNCTION_DESCRIPTION
 #' @param object PARAM_DESCRIPTION
 #' @param ... PARAM_DESCRIPTION
-#' @param iter PARAM_DESCRIPTION, Default: 1e+05
+#' @param iterations PARAM_DESCRIPTION, Default: 1e+05
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
 #' @examples
@@ -16,22 +16,22 @@
 #' }
 #' @keywords internal
 compare_hypotheses <-
-  function(object, ..., iter = 100000){
+  function(object, ..., iterations = 100000){
     UseMethod("compare_hypotheses")
   }
 
 #' @method compare_hypotheses ormle
 #' @keywords internal
 compare_hypotheses.ormle <-
-  function(object, ..., iter = 100000){
-    if (iter < 1) stop("No of iterations < 1")
+  function(object, ..., iterations = 100000){
+    if (iterations < 1) stop("No of iterations < 1")
     if (inherits(object, "ormle")) objlist <- list(object, ...) else objlist <- object
     isorlm <- sapply(objlist, function(x) inherits(x, "ormle"))
     orlmlist <- objlist[isorlm]
     Call <- match.call()
-    Call$iter <- NULL
+    Call$iterations <- NULL
     if (inherits(object, "ormle")) names(orlmlist) <- as.character(Call[-1L])[isorlm]
-    gorica_penalties <- lapply(orlmlist, function(x) gorica_penalty(x, iter = iter))
+    gorica_penalties <- lapply(orlmlist, function(x) gorica_penalty(x, iterations = iterations))
     loglik <- sapply(orlmlist, function(x) x$logLik)
     penalty <- sapply(gorica_penalties, `[[`, "penalty")
     #browser()
@@ -45,8 +45,8 @@ compare_hypotheses.ormle <-
 
 #' @method compare_hypotheses list
 #' @keywords internal
-compare_hypotheses.list <- function(object, ..., iter = 100000){
-  if (all(sapply(object, class) == "ormle")) out <- compare_hypotheses.ormle(object, iter = iter)
+compare_hypotheses.list <- function(object, ..., iterations = 100000){
+  if (all(sapply(object, class) == "ormle")) out <- compare_hypotheses.ormle(object, iterations = iterations)
   return(out)
 }
 
@@ -54,11 +54,11 @@ compare_hypotheses.list <- function(object, ..., iter = 100000){
 #' @importFrom mvtnorm rmvnorm
 #' @importFrom quadprog solve.QP
 gorica_penalty <-
-  function(object, iter = 100000){
+  function(object, iterations = 100000){
     K <- length(object$est)
     if(any(object$constr != 0) | object$nec != 0){
 
-      Z <- rmvnorm(n = iter, mean = rep(0, K), sigma = object$covmtrx)
+      Z <- rmvnorm(n = iterations, mean = rep(0, K), sigma = object$covmtrx)
       #browser()
       ginvcovm <- ginv(object$covmtrx)
       Dmat2 = 2*ginvcovm
@@ -74,7 +74,7 @@ gorica_penalty <-
           length(solveQP2$iact)
         }
       })
-      wt_bar <- sapply(1:K, function(x) sum(x == (K - nact)))/iter
+      wt_bar <- sapply(1:K, function(x) sum(x == (K - nact)))/iterations
       list(penalty = sum(1:K*wt_bar), wt_bar = wt_bar)
     } else {
       list(penalty = K, wt_bar = c(rep(0, K-1), 1))

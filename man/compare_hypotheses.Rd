@@ -4,14 +4,14 @@
 \alias{compare_hypotheses}
 \title{Evaluate Informative Hypotheses}
 \usage{
-compare_hypotheses(object, ..., iter = 1e+05)
+compare_hypotheses(object, ..., iterations = 1e+05)
 }
 \arguments{
 \item{object}{PARAM_DESCRIPTION}
 
 \item{...}{PARAM_DESCRIPTION}
 
-\item{iter}{PARAM_DESCRIPTION, Default: 1e+05}
+\item{iterations}{PARAM_DESCRIPTION, Default: 1e+05}
 }
 \value{
 OUTPUT_DESCRIPTION
