@@ -22,8 +22,8 @@ NeedsCompilation: no
 RoxygenNote: 6.1.1
 Depends: 
     R (>= 3.0.0),
-    stats,
-    bain
+    bain (>= 0.2.2),
+    stats
 Imports: 
     MASS,
     mvtnorm,

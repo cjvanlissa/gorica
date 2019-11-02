@@ -14,7 +14,7 @@
 #'  }
 #' }
 #' @rdname ormle
-#' @export
+#' @keywords internal
 ormle <-
   function(est,covmtrx,constr,rhs,nec){
   covmtrx = as.matrix(covmtrx)

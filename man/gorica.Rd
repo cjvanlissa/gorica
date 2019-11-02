@@ -2,7 +2,7 @@
 % Please edit documentation in R/gorica_methods.R
 \name{gorica}
 \alias{gorica}
-\title{Bayes factors for informative hypotheses}
+\title{Evaluate informative hypotheses using the GORICA}
 \usage{
 gorica(x, hypothesis, comparison = "unconstrained", ...)
 }
@@ -10,13 +10,12 @@ gorica(x, hypothesis, comparison = "unconstrained", ...)
 \item{x}{An R object containing the outcome of a statistical analysis.
 Currently, the following objects can be processed:
 \itemize{
-\item \code{lm()} objects (anova, ancova, multiple regression). In the
-Example section it is elaborated which calls to \code{lm} can be processed by
-\code{gorica} (other calls cannot be processed).
-\item \code{t.test()} objects (Student's t-test, Welch's t-test, paired
-samples t-test, one-group t-test, equivalence test).
+\item \code{lm()} objects (anova, ancova, multiple regression).
+\item \code{t_test()} objects.
+\item \code{lavaan} objects.
+\item \code{lmerMod} objects.
 \item A named vector containing the estimates resulting from a statistical
-analysis.
+analysis, when the argument \code{Sigma} is also specified.
 Note that, named means that each estimate has to be labelled such that it can
 be referred to in \code{hypotheses}.
 }}
@@ -28,22 +27,39 @@ evaluate (see Details).}
 should be compared to. Defaults to \code{comparison = "unconstrained"};
 options include \code{c("unconstrained", "complement", "none")}.}
 
-\item{...}{Additional arguments (see Details).}
+\item{...}{Additional arguments passed to the internal function
+\code{compare_hypotheses}.}
 }
 \value{
-Bla
+An object of class \code{gorica}, containing the following elements:
+\itemize{
+\item \code{fit}  A \code{data.frame} containing the loglikelihood, penalty
+(for complexity), the GORICA value, and the GORICA weights. The GORICA
+weights are calculated by taking into account the misﬁts and complexities of
+the hypotheses under evaluation. These weights are used to quantify the
+support in the data for each hypothesis under evaluation. By looking at the
+pairwise ratios between the GORICA weights, one can determine the relative
+importance of one hypothesis over another hypothesis.
+\item \code{call}  The original function call.
+\item \code{model}  The original model object (\code{x}).
+\item \code{estimates}  The parameters extracted from the \code{model}.
+\item \code{Sigma}  The asymptotic covariance matrix of the
+\code{estimates}.
+\item \code{comparison}  Which alternative hypothesis was used.
+\item \code{hypotheses}  The hypotheses evaluated in \code{fit}.
+}
 }
 \description{
-\code{gorica} is an acronym for "Bayesian informative hypotheses evaluation".
-It uses the Bayes factor to evaluate hypotheses specified using equality and
-inequality constraints among (linear combinations of) parameters in a wide
-range of statistical models. A tutorial is provided by Hoijtink, Mulder,
-van Lissa, and Gu (2018) retrievable from the Psychological Methods website
-at \url{https://www.apa.org/pubs/journals/met/} or the gorica website at
-\url{https://informative-hypotheses.sites.uu.nl/software/gorica/} Users are
-advised to read this tutorial before using \code{gorica}.
+GORICA is an acronym for "generalized order-restricted information criterion
+approximation". It can be utilized to evaluate informative hypotheses, which
+specify directional relationships between model parameters in terms of
+(in)equality constraints.
 }
 \details{
+The GORICA is applicable to not only normal linear models, but also applicable to generalized linear models (GLMs) (McCullagh & Nelder, 1989), generalized linear
+mixed models (GLMMs) (McCullogh & Searle, 2001), and structural equation
+models (SEMs) (Kline, 2010). In addition, the GORICA can be utilized in the context of contingency tables for which (in)equality constrained hypotheses do not necessarily contain linear restrictions on cell probabilities, but instead often contain non-linear restrictions on cell probabilities.
+
 \code{hypotheses} is a character string that specifies which informative
 hypotheses have to be evaluated. A simple example is \code{hypotheses <- "a >
 b > c; a = b = c;"} which specifies two hypotheses using three estimates with
@@ -111,14 +127,26 @@ hypotheses specified are possible. If not, \code{gorica} will either return an
 error message or render an output table containing \code{Inf}'s.
 }
 \examples{
-print("bla")
+res <- lm(Sepal.Length ~ Species-1, iris)
+est <- get_estimates(res)
+est
+gor <- gorica(res, "Speciessetosa < (Speciesversicolor, Speciesvirginica)",
+comparison = "complement")
+gor
+gor <- gorica(res, "Speciessetosa > (Speciesversicolor, Speciesvirginica)")
+gor
 }
 \references{
-All references are retrievable via or from
-\url{https://informative-hypotheses.sites.uu.nl/software/gorica/}
-}
-\seealso{
-The gorica website at
+Kuiper, R. M., Hoijtink, H., & Silvapulle, M. J. (2012).
+Generalization of the order-restricted information criterion for multivariate
+normal linear models. Journal of statistical planning and inference, 142(8),
+2454-2463. \href{https://doi.org/10.1016/j.jspi.2012.03.007}{
+doi:10.1016/j.jspi.2012.03.007}
+
+Altinisik, Y. (2018). Evaluation of Inequality Constrained Hypotheses Using
+an Akaike-Type Information Criterion (Doctoral dissertation,
+Utrecht University). ISBN: 978-90-393-6918-0.
+\url{https://dspace.library.uu.nl/handle/1874/360604}
 }
 \author{
 Caspar van Lissa, Yassin Altinisik, Rebecca Kuiper

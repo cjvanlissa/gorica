@@ -156,7 +156,7 @@ test_that("manual and package gorica same", {
 
 # CHeck penalty function --------------------------------------------------
 
-penalty_internal <- sapply(list(H1, H2, H3, Hu), function(x){gorica:::gorica_penalty3(x, iter = 100000)$penalty})
+penalty_internal <- sapply(list(H1, H2, H3, Hu), function(x){gorica:::gorica_penalty(x, iter = 100000)$penalty})
 
 penalty_original <- sapply(list(H1, H2, H3, Hu), function(x){tmp_gorica_penalty(x, iter = 100000)})
 
