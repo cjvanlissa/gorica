@@ -35,7 +35,7 @@ An object of class \code{gorica}, containing the following elements:
 \itemize{
 \item \code{fit}  A \code{data.frame} containing the loglikelihood, penalty
 (for complexity), the GORICA value, and the GORICA weights. The GORICA
-weights are calculated by taking into account the misﬁts and complexities of
+weights are calculated by taking into account the misfits and complexities of
 the hypotheses under evaluation. These weights are used to quantify the
 support in the data for each hypothesis under evaluation. By looking at the
 pairwise ratios between the GORICA weights, one can determine the relative
