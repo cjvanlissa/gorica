@@ -342,7 +342,11 @@ gorica.lm <-
 
     cl <- match.call()
     Args <- as.list(cl[-1])
-    if(!is.null(Args[["standardize"]])) warning("Cannot standardize an object of class 'lm'. Using unstandardized coefficients.")
+    if(!is.null(Args[["standardize"]])){
+      if(Args[["standardize"]]){
+        warning("Cannot standardize an object of class 'lm'. Using unstandardized coefficients.")
+      }
+    }
     Args$x <- coef(x)
     Args$Sigma <- vcov(x)
 

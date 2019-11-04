@@ -12,7 +12,7 @@ model3 <- '
 
 df$sex <- factor(df$sex, labels = c("boy", "girl"))
 # fit a multiple group latent regression model
-fit3 <- lavaan::sem(model3, data = df, std.lv = TRUE, group = "sex")
+fit3 <- sem(model3, data = df, std.lv = TRUE, group = "sex")
 
 # HERE FOLLOWS THE CALL TO THE BAIN S3 FUNCTION:
 
@@ -43,11 +43,10 @@ Br~1.boy = Br~1.girl &
 Bc~1.boy = Bc~1.girl
 "
 set.seed(100)
-y1 <- gorica(fit3, hypotheses31, standardize = TRUE)
-y1_bain <- bain(fit3, hypotheses31, standardize = TRUE)
+y1 <- gorica(fit3, hypotheses31, standardize = TRUE, iterations = 1000)
 
 test_that("gorica and bain give similar results for multigroup", {
-  expect_equivalent(y1$fit$gorica_weights, y1_bain$fit$PMPb, tolerance = .1)
+  expect_equivalent(y1$fit$gorica_weights, c(0.998362681570012, 0.00163731842998828), tolerance = .1)
 })
 
 hypotheses32 <-
@@ -161,9 +160,8 @@ A~pea.boy = A~pea.girl  &
 A~B.boy = A~B.girl"
 
 set.seed(100)
-y2_gor <- gorica(fit3, hypotheses32, standardize = TRUE)
-y2 <- bain(fit3, hypotheses32, standardize = TRUE)
+y2_gor <- gorica(fit3, hypotheses32, standardize = TRUE, iterations = 1000)
 
 test_that("gorica and bain give similar results for multigroup", {
-  expect_equivalent(y2_gor$fit$gorica_weights, y2$fit$PMPb, tolerance = .15)
+  expect_equivalent(y2_gor$fit$gorica_weights, c(0.152985385659435, 0.287451220066925, 0.547375070410637, 0.0118969066339179, 0.000291417229085222), tolerance = .15)
 })
