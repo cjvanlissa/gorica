@@ -3,39 +3,52 @@
 
 [![Travis build
 status](https://travis-ci.org/cjvanlissa/gorica.svg?branch=master)](https://travis-ci.org/cjvanlissa/gorica)
+[![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
 <!--[![CRAN status](https://www.r-pkg.org/badges/version/tidyLPA)](https://cran.r-project.org/package=tidyLPA)-->
 <!--[![](https://cranlogs.r-pkg.org/badges/tidyLPA)](https://cran.r-project.org/package=tidyLPA)-->
 
-[![lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
 <!-- [![DOI](http://joss.theoj.org/papers/10.21105/joss.00978/status.svg)](10.1111/bmsp.12110)-->
 
-# gorica
+# GORICA: Evaluation of Inequality Constrained Hypotheses Using Generalized AIC
 
-Evaluation of Inequality Constrained Hypotheses Using Generalized AIC
+Implements the generalized order-restricted information criterion
+approximation (GORICA). The GORICA can be utilized to evaluate
+(in)equality constrained hypotheses. The GORICA is applicable not only
+to normal linear models, but also to generalized linear models (GLMs),
+generalized linear mixed models (GLMMs), and structural equation models
+(SEMs). In addition, the GORICA can be utilized in the context of
+contingency tables for which (in)equality constrained hypotheses do not
+necessarily contain linear restrictions on cell probabilities, but
+instead often contain non-linear restrictions on cell probabilities.
 
-<!--
 ## Installation
 
-You can install bain from github with:
+You can install gorica from GitHub with:
 
-
-```r
+``` r
 # install.packages("devtools")
-devtools::install_github("cjvanlissa/bain", args = c("--no-multiarch", "--no-test-load"))
+devtools::install_github("cjvanlissa/gorica")
 ```
 
 ## Workflow
 
-Add bain to your existing R workflow, and obtain Bayes factors for your familiar R analyses! Bain is compatible with the pipe operator. Here is an example for testing an informative hypothesis about mean differences in an ANOVA:
+Add gorica to your existing R workflow, and evaluate informative
+hypotheses for your familiar R analyses\! Here is an example for testing
+an informative hypothesis about mean differences in an ANOVA:
 
-
-```r
-# Load dplyr to access the pipe operator
-library(dplyr)
-iris %>%                                 # Example data
-  select(Sepal.Length, Species) %>%      # Select outcome and predictor variables
-  lm(Sepal.Length ~ -1 + Species, .) %>% # Add -1 to the formula to estimate group means, as in ANOVA
-  bain("setosa < versicolor = virginica; setosa < versicolor < virginica")
-
+``` r
+res <- lm(Sepal.Length ~ -1 + Species, data = iris)
+gorica(res, "Speciessetosa < Speciesversicolor = Speciesvirginica; Speciessetosa < Speciesversicolor < Speciesvirginica")
+#> Informative hypothesis test for an object of class lm:
+#> 
+#>    loglik  penalty gorica gorica_weights
+#> H1 -14.948 1.499   32.894 0.000         
+#> H2 5.103   1.834   -6.538 0.762         
+#> Hu 5.103   3.000   -4.206 0.238         
+#> 
+#> Hypotheses:
+#>   H1: Speciessetosa<Speciesversicolor=Speciesvirginica
+#>   H2: Speciessetosa<Speciesversicolor<Speciesvirginica 
+#>   Hu: Unconstrained hypothesis
+#> 
 ```
--->

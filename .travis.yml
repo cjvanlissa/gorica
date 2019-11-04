@@ -12,9 +12,3 @@ matrix:
       r: release
     - os: linux
       r: devel
-    - os: osx
-      r: release
-    - os: osx
-      r: oldrel
-    - os: osx
-      r: devel

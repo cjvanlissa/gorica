@@ -1,4 +1,3 @@
-rm(list=ls())
 library(testthat)
 library(lavaan)
 library(bain)
