@@ -12,7 +12,7 @@ set.seed(100)
 z_gor <- gorica(ttest, "x=30; x>30; x<30", iterations = 1000)
 
 test_that("t_test one sample bain gor equivalent", {
-  expect_equivalent(z_gor$fit$gorica_weights, c(0.804179489440423, 0.0325376792911945, 0.0980093277485244, 0.065273503519858), tolerance = 1)
+  expect_true(order(z_gor$fit$gorica_weights)[4] == order(c(0.804179489440423, 0.0325376792911945, 0.0980093277485244, 0.065273503519858))[4])
 })
 
 x<-sesamesim$postnumb[which(sesamesim$sex==1)]
@@ -22,7 +22,7 @@ set.seed(100)
 z_gor <- gorica(ttest, "x=y; x>y; x<y", iterations = 1000)
 
 test_that("t_test independent samples bain gor equivalent", {
-  expect_equivalent(z_gor$fit$gorica_weights, c(0.794317856691633, 0.106425526453867, 0.0306959024183789, 0.0685607144361216), tolerance = 1)
+  expect_true(all(order(z_gor$fit$gorica_weights)[3:4] == order(c(0.794317856691633, 0.106425526453867, 0.0306959024183789, 0.0685607144361216))[3:4]))
 })
 
 # THE INDEPENDENT GROUPS T-TEST WITH A T.TEST OBJECT
@@ -34,7 +34,7 @@ set.seed(100)
 z_gor <- gorica(ttest, "x=y; x>y; x<y", iterations = 1000)
 
 test_that("t_test independent samples equal variances bain gor equivalent", {
-  expect_equivalent(z_gor$fit$gorica_weights, c(0.79427857891428, 0.106538356391755, 0.0306092576653946, 0.0685738070285696), tolerance = 1)
+  expect_true(all(order(z_gor$fit$gorica_weights)[3:4] == order(c(0.79427857891428, 0.106538356391755, 0.0306092576653946, 0.0685738070285696))[3:4]))
 })
 
 
