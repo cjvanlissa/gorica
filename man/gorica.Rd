@@ -16,7 +16,7 @@ Currently, the following objects can be processed:
 \item \code{lmerMod} objects.
 \item A named vector containing the estimates resulting from a statistical
 analysis, when the argument \code{Sigma} is also specified.
-Note that, named means that each estimate has to be labelled such that it can
+Note that, named means that each estimate has to be labeled such that it can
 be referred to in \code{hypotheses}.
 }}
 
@@ -189,8 +189,7 @@ John Wiley and Sons.
 
 Kuiper, R. M., Hoijtink, H., & Silvapulle, M. J. (2011).
 An Akaike-type information criterion for model selection under inequality
-constraints. Biometrika, 98, 495-501.
-\href{https://doi.org/10.1093/biomet/asr002}{doi:10.1093/biomet/asr002}
+constraints. Biometrika, 98, 495-501. doi:10.1093/biomet/asr002
 
 Kuiper, R. M., Hoijtink, H., & Silvapulle, M. J. (2012).
 Generalization of the order-restricted information criterion for multivariate
