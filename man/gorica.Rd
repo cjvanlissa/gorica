@@ -58,7 +58,7 @@ specify directional relationships between model parameters in terms of
 \details{
 The GORICA is applicable to not only normal linear models, but also applicable to generalized linear models (GLMs) (McCullagh & Nelder, 1989), generalized linear
 mixed models (GLMMs) (McCullogh & Searle, 2001), and structural equation
-models (SEMs) (Kline, 2010). In addition, the GORICA can be utilized in the context of contingency tables for which (in)equality constrained hypotheses do not necessarily contain linear restrictions on cell probabilities, but instead often contain non-linear restrictions on cell probabilities.
+models (SEMs) (Bollen, 1989). In addition, the GORICA can be utilized in the context of contingency tables for which (in)equality constrained hypotheses do not necessarily contain linear restrictions on cell probabilities, but instead often contain non-linear restrictions on cell probabilities.
 
 \code{hypotheses} is a character string that specifies which informative
 hypotheses have to be evaluated. A simple example is \code{hypotheses <- "a >
@@ -179,17 +179,31 @@ gor
 }
 }
 \references{
+Altinisik, Y. (2018). Evaluation of Inequality Constrained
+Hypotheses Using an Akaike-Type Information Criterion (Doctoral dissertation,
+Utrecht University). ISBN: 978-90-393-6918-0.
+\url{https://dspace.library.uu.nl/handle/1874/360604}
+
+Bollen, K. (1989). Structural equations with latent variables. New York, NY:
+John Wiley and Sons.
+
+Kuiper, R. M., Hoijtink, H., & Silvapulle, M. J. (2011).
+An Akaike-type information criterion for model selection under inequality
+constraints. Biometrika, 98, 495-501.
+\href{https://doi.org/10.1093/biomet/asr002}{doi:10.1093/biomet/asr002}
+
 Kuiper, R. M., Hoijtink, H., & Silvapulle, M. J. (2012).
 Generalization of the order-restricted information criterion for multivariate
 normal linear models. Journal of statistical planning and inference, 142(8),
 2454-2463. \href{https://doi.org/10.1016/j.jspi.2012.03.007}{
 doi:10.1016/j.jspi.2012.03.007}
 
-Altinisik, Y. (2018). Evaluation of Inequality Constrained Hypotheses Using
-an Akaike-Type Information Criterion (Doctoral dissertation,
-Utrecht University). ISBN: 978-90-393-6918-0.
-\url{https://dspace.library.uu.nl/handle/1874/360604}
+McCullagh, P. & Nelder, J. (1989). Generalized linear models (2nd ed.). Boca
+Raton, FL: Chapman & Hall / CRC.
+
+McCullogh, C. E., & Searle, S. R. (2001). Generalized linear and mixed
+models. New York, NY: Wiley.
 }
 \author{
-Caspar van Lissa, Yassin Altinisik, Rebecca Kuiper
+Caspar van Lissa, Yasin Altinisik, Rebecca Kuiper
 }

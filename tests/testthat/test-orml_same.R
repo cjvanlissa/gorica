@@ -44,7 +44,7 @@ constr <- matrix(c(1, 0, 0,
 1, 0, 1), nrow = 3, ncol = 3, byrow = TRUE)
 rhs <- rep(0, 3)
 nec <- 3
-H1 <- ormle(est = strest, covmtrx = strcovmtrx, constr = constr, nec = nec, rhs = rhs)
+H1 <- gorica:::ormle(est = strest, covmtrx = strcovmtrx, constr = constr, nec = nec, rhs = rhs)
 H1_original_ormle <- tmp_ormle(est = strest, covmtrx = strcovmtrx, constr = constr, nec = nec, rhs = rhs)
 
 test_that("ormle est same", {

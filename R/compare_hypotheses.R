@@ -67,7 +67,12 @@ gorica_penalty <-
       t_const <- t(object$constr)
 
       nact <- apply(dvec2, 1, function(z){
-        solveQP2 = solve.QP(Dmat2,z,t_const,object$rhs,meq = object$nec,factorized = FALSE)
+        solveQP2 = solve.QP(Dmat = Dmat2,
+                            dvec = z,
+                            Amat = t_const,
+                            bvec = object$rhs - object$rhs,
+                            meq = object$nec,
+                            factorized = FALSE)
         if (solveQP2$iact[1] == 0){
           0
         } else {

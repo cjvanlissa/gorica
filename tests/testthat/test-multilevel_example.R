@@ -29,7 +29,7 @@ constr <- matrix(c(1, 0, 0, 0, 0,
 0, 1, 0, 0, 1), nrow = 5, ncol = 5, byrow = TRUE)
 rhs <- rep(0, 5)
 nec <- 2
-H1 <- ormle(est = strest, covmtrx = strcovmtrx, constr = constr, nec = nec, rhs = rhs)
+H1 <- gorica:::ormle(est = strest, covmtrx = strcovmtrx, constr = constr, nec = nec, rhs = rhs)
 
 H1_char <- "zage = 0 & zage + zage:genderMale = 0 & zgevocab > 0 & zage:zgevocab > 0 & zgevocab+zgevocab:genderMale > 0"
 parsed_hyp1 <- bain:::parse_hypothesis(names(strest), H1_char)
@@ -48,7 +48,7 @@ constr <- matrix(c(-1, 0, 0, 0, 0,
 0, 1, 0, 0, 1), nrow = 5, ncol = 5, byrow = TRUE)
 rhs <- rep(0, 5)
 nec <- 0
-H2 <- ormle(est = strest, covmtrx = strcovmtrx, constr = constr, nec = nec, rhs = rhs)
+H2 <- gorica:::ormle(est = strest, covmtrx = strcovmtrx, constr = constr, nec = nec, rhs = rhs)
 
 H2_char <- "zage < 0 & zgevocab > 0 & zage:zgevocab > 0 & zage+zage:genderMale < 0&zgevocab+zgevocab:genderMale > 0"
 
@@ -68,7 +68,7 @@ constr <- matrix(c(0, 0, 1, 0, 0,
 0, -1, 0, 0, -1), nrow = 5, ncol = 5, byrow = TRUE)
 rhs <- rep(0,5)
 nec <- 1
-H3 <- ormle(est = strest, covmtrx = strcovmtrx, constr = constr, nec = nec, rhs = rhs)
+H3 <- gorica:::ormle(est = strest, covmtrx = strcovmtrx, constr = constr, nec = nec, rhs = rhs)
 
 H3_char <- "zage:zgevocab = 0 & zage > 0 & zgevocab > 0 & zage + zage:genderMale < 0 & zgevocab + zgevocab:genderMale < 0 "
 
@@ -84,13 +84,13 @@ test_that("Parsed H3 correct", {
 constr <- matrix(c(rep(0, 5)), nrow = 1, ncol = 5, byrow = TRUE)
 rhs <- rep(0, 1)
 nec <- 0
-Hu <- ormle(est = strest, covmtrx = strcovmtrx, constr = constr, nec = nec, rhs = rhs)
+Hu <- gorica:::ormle(est = strest, covmtrx = strcovmtrx, constr = constr, nec = nec, rhs = rhs)
 
 
 set.seed(111)
 
 #Performing gorica to obtain the values of misfit, complexity, GORICA, and GORICA weights
-man_gorica <- gorica:::compare_hypotheses(H1, H2, H3, Hu, iter = 100000)
+man_gorica <- gorica:::compare_hypotheses.ormle(H1, H2, H3, Hu, iter = 100000)
 
 res_gorica <- gorica(model, "zage = 0 & zage + zage:genderMale = 0 & zgevocab > 0 & zage:zgevocab > 0 & zgevocab+zgevocab:genderMale > 0; zage < 0 & zgevocab > 0 & zage:zgevocab > 0 & zage+zage:genderMale < 0&zgevocab+zgevocab:genderMale > 0; zage:zgevocab = 0 & zage > 0 & zgevocab > 0 & zage + zage:genderMale < 0 & zgevocab + zgevocab:genderMale < 0 ", iter = 100000)
 

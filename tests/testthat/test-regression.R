@@ -28,5 +28,5 @@ set.seed(100)
 sz_gor<-gorica(regr,"Int>5 & pre > pea", standardize = FALSE, iterations = 1000)
 
 test_that("gorica and bain give similar results for regression", {
-  expect_equivalent(sz_gor$fit$gorica_weights, c(0.775134354794349, 0.224865645205651), tolerance = .01)
+  expect_equivalent(sz_gor$fit$gorica_weights, c(0.775134354794349, 0.224865645205651), tolerance = .07)
 })
