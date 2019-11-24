@@ -1,5 +1,16 @@
 # Version 0.1.0
+
 This is a new submission.
+Addressed comments by Uwe Ligges:
+
+* Found the following (possibly) invalid URLs  
+    URL: https://doi.org/10.1093/biomet/asr002
+    + Addressed by removing broken URL and emailing Biometrika to restore  
+      this page
+* Is there some reference about the method you can add in the Description  
+    field in the form Authors (year) <doi:.....>?
+    + Added reference with doi to Description: Kuiper, Hoijtink, & Silvapulle  
+        (2012) <doi:10.1016/j.jspi.2012.03.007>
 
 ## Test environments
 * Local Windows 10 (x64 and x32, build 15063), R 3.6.1

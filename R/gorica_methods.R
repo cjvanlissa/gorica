@@ -124,8 +124,7 @@
 #'
 #' Kuiper, R. M., Hoijtink, H., & Silvapulle, M. J. (2011).
 #' An Akaike-type information criterion for model selection under inequality
-#' constraints. Biometrika, 98, 495-501.
-#' \href{https://doi.org/10.1093/biomet/asr002}{doi:10.1093/biomet/asr002}
+#' constraints. Biometrika, 98, 495-501. doi:10.1093/biomet/asr002
 #'
 #' Kuiper, R. M., Hoijtink, H., & Silvapulle, M. J. (2012).
 #' Generalization of the order-restricted information criterion for multivariate
