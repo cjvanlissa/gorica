@@ -14,7 +14,7 @@
 #' \item \code{lmerMod} objects.
 #' \item A named vector containing the estimates resulting from a statistical
 #' analysis, when the argument \code{Sigma} is also specified.
-#' Note that, named means that each estimate has to be labelled such that it can
+#' Note that, named means that each estimate has to be labeled such that it can
 #' be referred to in \code{hypotheses}.
 #' }
 #' @param hypothesis A character string containing the informative hypotheses to

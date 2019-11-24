@@ -10,7 +10,7 @@
 #'   \strong{edc} \tab \code{factor} \tab Whether a participant graduated high
 #'   school or not (1 = not graduated, 2 = graduated)\cr
 #'   \strong{y1} \tab \code{integer} \tab information; general knowledge of participants \cr
-#'   \strong{y2} \tab \code{integer} \tab comprehension; ability of abstract reasoning or judgement \cr
+#'   \strong{y2} \tab \code{integer} \tab comprehension; ability of abstract reasoning or judgment \cr
 #'   \strong{y3} \tab \code{integer} \tab similarities; unifying a theme \cr
 #'   \strong{y4} \tab \code{integer} \tab vocabulary; verbal definition \cr
 #'   \strong{y5} \tab \code{integer} \tab picture completion; perceiving visual images with missing features \cr
@@ -23,7 +23,7 @@
 #' @name wechsler
 #' @usage data(wechsler)
 #' @references McArdle, J. J., & Prescott, C. A. (1992). Age-based construct
-#' validation using stuctural equation modeling. Experimental Aging Research,
+#' validation using structural equation modeling. Experimental Aging Research,
 #' 18, 87-115.
 #' @format A data frame with 1680 rows and 10 variables.
 NULL
