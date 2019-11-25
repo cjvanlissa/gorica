@@ -11,6 +11,7 @@ Addressed comments by Uwe Ligges:
     field in the form Authors (year) <doi:.....>?
     + Added reference with doi to Description: Kuiper, Hoijtink, & Silvapulle  
         (2012) <doi:10.1016/j.jspi.2012.03.007>
+* Rebuilt documentation using devtools::document()
 
 ## Test environments
 * Local Windows 10 (x64 and x32, build 15063), R 3.6.1
