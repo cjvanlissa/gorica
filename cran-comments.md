@@ -1,17 +1,14 @@
 # Version 0.1.0
 
 This is a new submission.
-Addressed comments by Uwe Ligges:
+Addressed comments by Jelena Saf:
 
-* Found the following (possibly) invalid URLs  
-    URL: https://doi.org/10.1093/biomet/asr002
-    + Addressed by removing broken URL and emailing Biometrika to restore  
-      this page
-* Is there some reference about the method you can add in the Description  
-    field in the form Authors (year) <doi:.....>?
-    + Added reference with doi to Description: Kuiper, Hoijtink, & Silvapulle  
-        (2012) <doi:10.1016/j.jspi.2012.03.007>
-* Rebuilt documentation using devtools::document()
+* Please shorten the title to a maximum of 65 characters.
+  + The title is now 60 characters
+* Please considerably reduce the check time of your package to stay below the threshold of 10 minutes.
+  + Done; test time on my machine is now 89.57 seconds
+* Please omit the examples from your unexported functions, f.i. ormle().
+  + Done.
 
 ## Test environments
 * Local Windows 10 (x64 and x32, build 15063), R 3.6.1

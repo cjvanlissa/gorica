@@ -1,27 +1,8 @@
-#' @title Evaluate Informative Hypotheses
-#' @description FUNCTION_DESCRIPTION
-#' @param object PARAM_DESCRIPTION
-#' @param ... PARAM_DESCRIPTION
-#' @param iterations PARAM_DESCRIPTION, Default: 1e+05
-#' @return OUTPUT_DESCRIPTION
-#' @details DETAILS
-#' @examples
-#' \dontrun{
-#'   #Model fitting
-#'   model <- glm(num_awards ~ -1+prog + math + prog * math, family = "poisson",
-#'                data = academic_awards)
-#'   new_gor <- gorica(x = model, hypothesis = "math=0&math+progGeneral:math=0&
-#'   math+progVocational:math=0;progGeneral:math > progVocational:math&
-#'   progVocational:math>0; progVocational:math<0")
-#' }
-#' @keywords internal
 compare_hypotheses <-
   function(object, ..., iterations = 100000){
     UseMethod("compare_hypotheses")
   }
 
-#' @method compare_hypotheses ormle
-#' @keywords internal
 compare_hypotheses.ormle <-
   function(object, ..., iterations = 100000){
     if (iterations < 1) stop("No of iterations < 1")
@@ -43,8 +24,6 @@ compare_hypotheses.ormle <-
     )
   }
 
-#' @method compare_hypotheses list
-#' @keywords internal
 compare_hypotheses.list <- function(object, ..., iterations = 100000){
   if (all(sapply(object, class) == "ormle")) out <- compare_hypotheses.ormle(object, iterations = iterations)
   return(out)

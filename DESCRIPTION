@@ -1,7 +1,7 @@
 Package: gorica
 Type: Package
 Date: 2019-11-24
-Title: Evaluation of Inequality Constrained Hypotheses Using Generalized AIC
+Title: Evaluation of Inequality Constrained Hypotheses Using GORICA
 Version: 0.1.0
 Authors@R: c(
     person(c("Rebecca M."), "Kuiper", role = "aut"),
