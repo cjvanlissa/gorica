@@ -104,7 +104,7 @@ comp <-
 
     # compute penalty term value PTc
     # Gorica heeft geen atrribute "method". Volgens mij zijn pmvnorm de juiste weights?
-    PTc <- as.numeric(1 + p - wt_bar[idx] * lq1)
+    PTc <- as.numeric(p - wt_bar[idx] * lq1)
 
 
     # complement
