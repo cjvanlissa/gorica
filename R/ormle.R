@@ -1,20 +1,3 @@
-#' @title ormle
-#' @description FUNCTION_DESCRIPTION
-#' @param est PARAM_DESCRIPTION
-#' @param covmtrx PARAM_DESCRIPTION
-#' @param constr PARAM_DESCRIPTION
-#' @param rhs PARAM_DESCRIPTION
-#' @param nec PARAM_DESCRIPTION
-#' @return OUTPUT_DESCRIPTION
-#' @details DETAILS
-#' @examples
-#' \dontrun{
-#' if(interactive()){
-#'  #EXAMPLE1
-#'  }
-#' }
-#' @rdname ormle
-#' @export
 ormle <-
   function(est,covmtrx,constr,rhs,nec){
   covmtrx = as.matrix(covmtrx)

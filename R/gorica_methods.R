@@ -1,32 +1,35 @@
-#' Bayes factors for informative hypotheses
+#' Evaluate informative hypotheses using the GORICA
 #'
-#' \code{gorica} is an acronym for "Bayesian informative hypotheses evaluation".
-#' It uses the Bayes factor to evaluate hypotheses specified using equality and
-#' inequality constraints among (linear combinations of) parameters in a wide
-#' range of statistical models. A tutorial is provided by Hoijtink, Mulder,
-#' van Lissa, and Gu (2018) retrievable from the Psychological Methods website
-#' at \url{https://www.apa.org/pubs/journals/met/} or the gorica website at
-#' \url{https://informative-hypotheses.sites.uu.nl/software/gorica/} Users are
-#' advised to read this tutorial before using \code{gorica}.
+#' GORICA is an acronym for "generalized order-restricted information criterion
+#' approximation". It can be utilized to evaluate informative hypotheses, which
+#' specify directional relationships between model parameters in terms of
+#' (in)equality constraints.
 #'
 #' @param x An R object containing the outcome of a statistical analysis.
 #' Currently, the following objects can be processed:
 #' \itemize{
-#' \item \code{lm()} objects (anova, ancova, multiple regression). In the
-#' Example section it is elaborated which calls to \code{lm} can be processed by
-#' \code{gorica} (other calls cannot be processed).
-#' \item \code{t.test()} objects (Student's t-test, Welch's t-test, paired
-#' samples t-test, one-group t-test, equivalence test).
+#' \item \code{lm()} objects (anova, ancova, multiple regression).
+#' \item \code{t_test()} objects.
+#' \item \code{lavaan} objects.
+#' \item \code{lmerMod} objects.
 #' \item A named vector containing the estimates resulting from a statistical
-#' analysis.
-#' Note that, named means that each estimate has to be labelled such that it can
+#' analysis, when the argument \code{Sigma} is also specified.
+#' Note that, named means that each estimate has to be labeled such that it can
 #' be referred to in \code{hypotheses}.
 #' }
 #' @param hypothesis A character string containing the informative hypotheses to
 #' evaluate (see Details).
-#' @param ... Additional arguments (see Details).
+#' @param comparison A character string indicating what the \code{hypothesis}
+#' should be compared to. Defaults to \code{comparison = "unconstrained"};
+#' options include \code{c("unconstrained", "complement", "none")}.
+#' @param ... Additional arguments passed to the internal function
+#' \code{compare_hypotheses}.
 #'
 #' @details
+#' The GORICA is applicable to not only normal linear models, but also applicable to generalized linear models (GLMs) (McCullagh & Nelder, 1989), generalized linear
+#' mixed models (GLMMs) (McCullogh & Searle, 2001), and structural equation
+#' models (SEMs) (Bollen, 1989). In addition, the GORICA can be utilized in the context of contingency tables for which (in)equality constrained hypotheses do not necessarily contain linear restrictions on cell probabilities, but instead often contain non-linear restrictions on cell probabilities.
+#'
 #' \code{hypotheses} is a character string that specifies which informative
 #' hypotheses have to be evaluated. A simple example is \code{hypotheses <- "a >
 #' b > c; a = b = c;"} which specifies two hypotheses using three estimates with
@@ -93,22 +96,255 @@
 #' hypotheses specified are possible. If not, \code{gorica} will either return an
 #' error message or render an output table containing \code{Inf}'s.
 #'
-#' @return Bla
-#' @author Caspar van Lissa, Yassin Altinisik, Rebecca Kuiper
-#' @references All references are retrievable via or from
-#' \url{https://informative-hypotheses.sites.uu.nl/software/gorica/}
+#' @return An object of class \code{gorica}, containing the following elements:
+#' \itemize{
+#' \item \code{fit}  A \code{data.frame} containing the loglikelihood, penalty
+#' (for complexity), the GORICA value, and the GORICA weights. The GORICA
+#' weights are calculated by taking into account the misfits and complexities of
+#' the hypotheses under evaluation. These weights are used to quantify the
+#' support in the data for each hypothesis under evaluation. By looking at the
+#' pairwise ratios between the GORICA weights, one can determine the relative
+#' importance of one hypothesis over another hypothesis.
+#' \item \code{call}  The original function call.
+#' \item \code{model}  The original model object (\code{x}).
+#' \item \code{estimates}  The parameters extracted from the \code{model}.
+#' \item \code{Sigma}  The asymptotic covariance matrix of the
+#' \code{estimates}.
+#' \item \code{comparison}  Which alternative hypothesis was used.
+#' \item \code{hypotheses}  The hypotheses evaluated in \code{fit}.
+#' }
+#' @author Caspar van Lissa, Yasin Altinisik, Rebecca Kuiper
+#' @references Altinisik, Y. (2018). Evaluation of Inequality Constrained
+#' Hypotheses Using an Akaike-Type Information Criterion (Doctoral dissertation,
+#' Utrecht University). ISBN: 978-90-393-6918-0.
+#' \url{https://dspace.library.uu.nl/handle/1874/360604}
 #'
-#' @seealso The gorica website at
+#' Bollen, K. (1989). Structural equations with latent variables. New York, NY:
+#' John Wiley and Sons.
+#'
+#' Kuiper, R. M., Hoijtink, H., & Silvapulle, M. J. (2011).
+#' An Akaike-type information criterion for model selection under inequality
+#' constraints. Biometrika, 98, 495-501. doi:10.1093/biomet/asr002
+#'
+#' Kuiper, R. M., Hoijtink, H., & Silvapulle, M. J. (2012).
+#' Generalization of the order-restricted information criterion for multivariate
+#' normal linear models. Journal of statistical planning and inference, 142(8),
+#' 2454-2463. \href{https://doi.org/10.1016/j.jspi.2012.03.007}{
+#' doi:10.1016/j.jspi.2012.03.007}
+#'
+#' McCullagh, P. & Nelder, J. (1989). Generalized linear models (2nd ed.). Boca
+#' Raton, FL: Chapman & Hall / CRC.
+#'
+#' McCullogh, C. E., & Searle, S. R. (2001). Generalized linear and mixed
+#' models. New York, NY: Wiley.
 #' @examples
-#' print("bla")
+#' \dontshow{
+#' # EXAMPLE 1. One-sample t test
+#' ttest1 <- t_test(iris$Sepal.Length,mu=5)
+#' gorica(ttest1,"x<5.8", iterations = 5)
+#'
+#' # EXAMPLE 2. ANOVA
+#' aov1 <- aov(yield ~ block-1 + N * P + K, npk)
+#' gorica(aov1,hypothesis="block1=block5;
+#'    K1<0", iterations = 5)
+#'
+#' # EXAMPLE 3. gml
+#' counts <- c(18,17,15,20,10,20,25,13,12)
+#' outcome <- gl(3,1,9)
+#' treatment <- gl(3,3)
+#' fit <- glm(counts ~ outcome-1 + treatment, family = poisson())
+#' gorica(fit, "outcome1 > (outcome2, outcome3)", iterations = 5)
+#'
+#' # EXAMPLE 4. ANOVA
+#' res <- lm(Sepal.Length ~ Species-1, iris)
+#' est <- get_estimates(res)
+#' est
+#' gor <- gorica(res, "Speciessetosa < (Speciesversicolor, Speciesvirginica)",
+#' comparison = "complement", iterations = 5)
+#' gor
+#' }
+#' \donttest{
+#' # EXAMPLE 1. One-sample t test
+#' ttest1 <- t_test(iris$Sepal.Length,mu=5)
+#' gorica(ttest1,"x<5.8")
+#'
+#' # EXAMPLE 2. ANOVA
+#' aov1 <- aov(yield ~ block-1 + N * P + K, npk)
+#' gorica(aov1,hypothesis="block1=block5;
+#'    K1<0")
+#'
+#' # EXAMPLE 3. gml
+#' counts <- c(18,17,15,20,10,20,25,13,12)
+#' outcome <- gl(3,1,9)
+#' treatment <- gl(3,3)
+#' fit <- glm(counts ~ outcome-1 + treatment, family = poisson())
+#' gorica(fit, "outcome1 > (outcome2, outcome3)")
+#'
+#' # EXAMPLE 4. ANOVA
+#' res <- lm(Sepal.Length ~ Species-1, iris)
+#' est <- get_estimates(res)
+#' est
+#' gor <- gorica(res, "Speciessetosa < (Speciesversicolor, Speciesvirginica)",
+#' comparison = "complement")
+#' gor
+#' }
 #' @rdname gorica
 #' @export
 #' @importFrom stats as.formula coef complete.cases cov lm model.frame
 #' model.matrix pt qt sd setNames summary.lm var vcov
 #'
-gorica <- function(x, hypothesis, ...) {
+gorica <- function(x, hypothesis, comparison = "unconstrained", ...) {
   UseMethod("gorica", x)
 }
+
+#' @method gorica default
+#' @export
+gorica.default <- function(x,
+                           hypothesis,
+                           comparison = "unconstrained",
+                           Sigma,
+                           ...
+)
+{
+  cl <- match.call()
+  Goricares <- list(
+    fit = NULL,
+    call = cl,
+    model = x,
+    estimates = x,
+    Sigma = Sigma,
+    comparison = comparison
+  )
+
+  if(is.list(Sigma) & length(Sigma) == 1) Sigma <- Sigma[[1]]
+  names(x) <- rename_function(names(x))
+  colnames(Sigma) <- rownames(Sigma) <- names(x)
+  # Parse hypotheses --------------------------------------------------------
+  #ren_estimate <- rename_estimate(x)
+  if(!inherits(comparison, "character")|length(comparison) > 1){
+    stop("Argument 'comparison' must be an atomic character string.")
+  } else {
+    comp_arg <- pmatch(comparison, c("unconstrained", "complement", "none"))
+    if(is.na(comp_arg)) stop("Argument 'comparison' did not match one of the available options: 'unconstrained', 'complement', or 'none'.")
+    comparison <- c("unconstrained", "complement", "none")[pmatch(comparison, c("unconstrained", "complement", "none"))]
+  }
+  if(inherits(hypothesis, "character")){
+    hypothesis <- rename_function(hypothesis)
+    hyp_params <- params_in_hyp(hypothesis)
+    coef_in_hyp <- sort(unique(charmatch(rename_function(hyp_params),
+                             rename_function(names(x)))))
+    if(anyNA(coef_in_hyp)){
+      stop("Some of the parameters referred to in the 'hypothesis' do not correspond to parameter names of object 'x'.\n  The following parameter names in the 'hypothesis' did not match any parameters in 'x': ",
+           paste(hyp_params[is.na(coef_in_hyp)], collapse = ", "),
+           "\n  The parameters in object 'x' are named: ",
+           paste(names(x), collapse = ", "))
+    }
+    if(any(coef_in_hyp == 0)){
+      stop("Some of the parameters referred to in the 'hypothesis' matched multiple parameter names of object 'x'.\n  The following parameter names in the 'hypothesis' matched multiple parameters in 'x': ",
+           paste(hyp_params[coef_in_hyp == 0], collapse = ", "),
+           "\n  The parameters in object 'x' are named: ",
+           paste(names(x), collapse = ", "))
+    }
+    # Drop parameters not in hypothesis
+    x <- x[coef_in_hyp]
+    Sigma <- Sigma[coef_in_hyp, coef_in_hyp]
+
+    hypothesis <- parse_hypothesis(names(x), hypothesis)
+  } else {
+    if(inherits(hypothesis, "list") & !is.null(hypothesis[["hyp_mat"]]) & !is.null(hypothesis[["n_ec"]])){
+      hypothesis$original_hypothesis <- matrix_to_hyp(hypothesis, names(x))
+    } else {
+      stop("Argument 'hypothesis' must either be a character string with inequality constraints, or a list with an element 'hyp_mat', consisting of a list of hypothesis matrices, and and element 'n_ec', consisting of an integer vector with the number of equality constraints for each hypothesis matrix in 'hyp_mat'.")
+    }
+  }
+  hypotheses <- mapply(function(this_hyp, nec_num){
+    ormle(x,
+          Sigma,
+          constr = this_hyp[, -ncol(this_hyp), drop = FALSE],
+          nec = nec_num,
+          this_hyp[, ncol(this_hyp)]
+    )
+  }, this_hyp = hypothesis$hyp_mat, nec_num = hypothesis$n_ec, SIMPLIFY = FALSE)
+
+  hyp <- reverse_rename_function(hypothesis$original_hypothesis)
+
+  if(comparison == "unconstrained"){
+    hypotheses <- c(hypotheses,
+                    list(ormle(est = x,
+                               covmtrx = Sigma,
+                               constr = matrix(c(rep(0, length(x))), nrow = 1),
+                               nec = 0,
+                               rhs = 0)
+                    ))
+    hyp <- c(hyp, "Hu")
+  }
+  res <- compare_hypotheses(hypotheses, ...)
+  fit <- res$comparisons
+
+  if(comparison == "complement"){
+    use_wtbar <- res[["gorica_penalties"]][[1]][["wt_bar"]]
+    use_wtbar <- use_wtbar[length(use_wtbar) - hypothesis$n_ec[1]]
+    complement <- do.call(comp, c(hypotheses[[1]], wt_bar = use_wtbar))
+    fit <- rbind(fit, complement)
+    hyp <- c(hyp, "Hc")
+  }
+
+  fit$gorica_weights <- compute_weights(fit$gorica)
+
+  Goricares[c("fit", "hypotheses")] <- list(fit, hyp)
+  class(Goricares) <- "gorica"
+  Goricares
+}
+
+
+
+#' @method gorica htest
+#' @export
+gorica.htest <-
+  function(x,
+           hypothesis,
+           comparison = "unconstrained",
+           ...) {
+    stop("To be able to run gorica on the results of an object returned by t.test(), you must first load the 'gorica' package, and then conduct your t.test. The standard t.test does not return group-specific variances and sample sizes, which are required by gorica. When you load the gorica package, the standard t.test is replaced by a version that does return this necessary information.")
+  }
+
+#' @method gorica t_test
+#' @export
+gorica.t_test <-
+  function(x,
+           hypothesis,
+           comparison = "unconstrained",
+           ...) {
+    cl <- match.call()
+    Args <- as.list(cl[-1])
+
+    Args$x <- x$estimate
+    #Args$n <- x$n
+
+    if(length(x$estimate) == 1){
+      Args$Sigma <- list(matrix(x$v/x$n))
+    } else {
+      if (!x$method == " Two Sample t-test") {
+        Args$Sigma <- list(diag(x$v/x$n)) #lapply(x$v/x$n, as.matrix)
+      } else {
+        df <- sum(x$n) - 2
+        v <- 0
+        if (x$n[1] > 1)
+          v <- v + (x$n[1] - 1) * x$v[1]
+        if (x$n[2] > 1)
+          v <- v + (x$n[2] - 1) * x$v[2]
+        v <- v/df
+        Args$Sigma <- list(diag(v / x$n)) #lapply(v / x$n, as.matrix)
+      }
+    }
+
+    Gorica_res <- do.call(gorica, Args)
+    Gorica_res$call <- cl
+    Gorica_res$model <- x
+    class(Gorica_res) <- c("t_test", class(Gorica_res))
+    Gorica_res
+  }
+
 
 
 #' @method gorica lm
@@ -116,11 +352,16 @@ gorica <- function(x, hypothesis, ...) {
 gorica.lm <-
   function(x,
            hypothesis,
+           comparison = "unconstrained",
            ...) {
 
     cl <- match.call()
     Args <- as.list(cl[-1])
-
+    if(!is.null(Args[["standardize"]])){
+      if(Args[["standardize"]]){
+        warning("Cannot standardize an object of class 'lm'. Using unstandardized coefficients.")
+      }
+    }
     Args$x <- coef(x)
     Args$Sigma <- vcov(x)
 
@@ -136,10 +377,11 @@ gorica.lm <-
   }
 
 #' @method gorica mplus.model
-#' @export
+#' @keywords internal
 gorica.mplus.model <-
   function(x,
            hypothesis,
+           comparison = "unconstrained",
            ...) {
 
     cl <- match.call()
@@ -164,14 +406,15 @@ gorica.mplus.model <-
 gorica.lavaan <-
   function(x,
            hypothesis,
+           comparison = "unconstrained",
+           standardize = FALSE,
            ...) {
-
     cl <- match.call()
     Args <- as.list(cl[-1])
-    mplus_est <- get_estimates(x)
+    mplus_est <- get_estimates(x, standardize)
     Args$x <- mplus_est$estimate
     Args$Sigma <- mplus_est$Sigma
-
+    Args$hypothesis <- force(hypothesis)
     Gorica_res <- do.call(gorica, Args)
     Gorica_res$call <- cl
     Gorica_res$model <- x
@@ -183,12 +426,37 @@ gorica.lavaan <-
     Gorica_res
   }
 
-
-#' @method gorica gorica_estimate
+#' @method gorica lmerMod
 #' @export
-gorica.gorica_estimate <-
+gorica.lmerMod <-
   function(x,
            hypothesis,
+           comparison = "unconstrained",
+           ...) {
+
+    cl <- match.call()
+    Args <- as.list(cl[-1])
+
+    Args$x <- fixef(x)
+    Args$Sigma <- vcov(x)
+
+    Gorica_res <- do.call(gorica, Args)
+    Gorica_res$call <- cl
+    Gorica_res$model <- x
+
+    #if(!is.null(Warnings)){
+    #  Gorica_res$Warnings <- Warnings
+    #}
+    class(Gorica_res) <- c("gorica_lmerMod", class(Gorica_res))
+    Gorica_res
+  }
+
+#' @method gorica model_estimates
+#' @export
+gorica.model_estimates <-
+  function(x,
+           hypothesis,
+           comparison = "unconstrained",
            ...) {
 
     cl <- match.call()
@@ -204,128 +472,7 @@ gorica.gorica_estimate <-
     #if(!is.null(Warnings)){
     #  Gorica_res$Warnings <- Warnings
     #}
-    class(Gorica_res) <- c("gorica_ge", class(Gorica_res))
+    class(Gorica_res) <- c("gorica_model_estimates", class(Gorica_res))
     Gorica_res
   }
 
-#' @method gorica default
-#' @export
-gorica.default <- function(x,
-                         hypothesis,
-                         Sigma,
-                         ...
-                         )
-{
-  cl <- match.call()
-  # Parse hypotheses --------------------------------------------------------
-  #ren_estimate <- rename_estimate(x)
-  if(inherits(hypothesis, "character")){
-    hyp_params <- params_in_hyp(hypothesis)
-    coef_in_hyp <- charmatch(rename_function(hyp_params),
-                             rename_function(names(x)))
-
-    if(anyNA(coef_in_hyp)){
-      stop("Some of the parameters referred to in the 'hypothesis' do not correspond to parameter names of object 'x'.\n  The following parameter names in the 'hypothesis' did not match any parameters in 'x': ",
-           paste(hyp_params[is.na(coef_in_hyp)], collapse = ", "),
-           "\n  The parameters in object 'x' are named: ",
-           paste(names(x), collapse = ", "))
-    }
-    if(any(coef_in_hyp == 0)){
-      stop("Some of the parameters referred to in the 'hypothesis' matched multiple parameter names of object 'x'.\n  The following parameter names in the 'hypothesis' matched multiple parameters in 'x': ",
-           paste(hyp_params[coef_in_hyp == 0], collapse = ", "),
-           "\n  The parameters in object 'x' are named: ",
-           paste(names(x), collapse = ", "))
-    }
-    hypothesis <- parse_hypothesis(names(x), hypothesis)
-  } else {
-    if(inherits(hypothesis, "list") & !is.null(hypothesis[["hyp_mat"]]) & !is.null(hypothesis[["n_ec"]])){
-      hypothesis$original_hypothesis <- matrix_to_hyp(hypothesis, names(x))
-    } else {
-      stop("Argument 'hypothesis' must either be a character string with inequality constraints, or a list with an element 'hyp_mat', consisting of a list of hypothesis matrices, and and element 'n_ec', consisting of an integer vector with the number of equality constraints for each hypothesis matrix in 'hyp_mat'.")
-    }
-  }
-  #Args$hypothesis <- parsed_hyp
-
-  hypotheses <- mapply(function(this_hyp, nec_num){
-    ormle(x,
-          Sigma,
-          constr = this_hyp[, -ncol(this_hyp), drop = FALSE],
-          nec = nec_num,
-          this_hyp[, ncol(this_hyp)]
-          )
-  }, this_hyp = hypothesis$hyp_mat, nec_num = hypothesis$n_ec, SIMPLIFY = FALSE)
-  hypotheses <- c(hypotheses,
-                  list(ormle(est = x,
-                          covmtrx = Sigma,
-                          const = matrix(c(rep(0, length(x))), nrow = 1),
-                          nec = 0,
-                          rhs = 0)
-                  ))
-  res <- compare_hypotheses(hypotheses)
-
-  Goricares <- list(
-    fit = data.frame(res),
-    #BFmatrix = BFmatrix,
-    #b = b,
-
-    call = cl,
-    model = x,
-    hypotheses = reverse_rename_function(hypothesis$original_hypothesis),
-    #independent_restrictions = rank_hyp,
-    estimates = x#,
-    #n = n
-  )
-  class(Goricares) <- "gorica"
-  Goricares
-}
-
-
-
-#' @method gorica htest
-#' @export
-gorica.htest <-
-  function(x,
-           hypothesis,
-           ...) {
-    stop("To be able to run gorica on the results of an object returned by t.test(), you must first load the 'gorica' package, and then conduct your t.test. The standard t.test does not return group-specific variances and sample sizes, which are required by gorica. When you load the gorica package, the standard t.test is replaced by a version that does return this necessary information.")
-  }
-
-#' @method gorica gorica_htest
-#' @export
-gorica.gorica_htest <-
-  function(x,
-           hypothesis,
-           ...) {
-    cl <- match.call()
-    Args <- as.list(cl[-1])
-
-    Args$x <- x$estimate
-    Args$n <- x$n
-
-    if(length(x$estimate) == 1){
-      Args$Sigma <- x$v/x$n
-      Args$group_parameters <- 0
-      Args$joint_parameters <- 1
-    } else {
-      if (!x$method == " Two Sample t-test") {
-        Args$Sigma <- lapply(x$v/x$n, as.matrix)
-      } else {
-        df <- sum(x$n) - 2
-        v <- 0
-        if (x$n[1] > 1)
-          v <- v + (x$n[1] - 1) * x$v[1]
-        if (x$n[2] > 1)
-          v <- v + (x$n[2] - 1) * x$v[2]
-        v <- v/df
-        Args$Sigma <- lapply(v / x$n, as.matrix)
-      }
-      Args$group_parameters <- 1
-      Args$joint_parameters <- 0
-    }
-
-    Gorica_res <- do.call(gorica, Args)
-    Gorica_res$call <- cl
-    Gorica_res$model <- x
-    class(Gorica_res) <- c("gorica_htest", class(Gorica_res))
-    Gorica_res
-  }

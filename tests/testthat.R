@@ -1,5 +1,5 @@
-rm(list=ls())
 library(testthat)
+library(lavaan)
 library(bain)
-library(mvtnorm)
-test_check("bain")
+library(gorica)
+test_check("gorica")
