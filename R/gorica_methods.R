@@ -282,7 +282,9 @@ gorica.default <- function(x,
   fit <- res$comparisons
 
   if(comparison == "complement"){
-    complement <- do.call(comp, c(hypotheses[[1]], wt_bar = res[[1]][[2]]))
+    use_wtbar <- res[["gorica_penalties"]][[1]][["wt_bar"]]
+    use_wtbar <- use_wtbar[length(use_wtbar) - hypothesis$n_ec[1]]
+    complement <- do.call(comp, c(hypotheses[[1]], wt_bar = use_wtbar))
     fit <- rbind(fit, complement)
     hyp <- c(hyp, "Hc")
   }
