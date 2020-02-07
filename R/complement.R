@@ -101,7 +101,6 @@ comp <-
     # free parameters. Note that constr includes q1 and q2 constraints
     f <- p - nrow(constr) # p - q1 - q2
     idx <- length(wt_bar)
-
     # compute penalty term value PTc
     # Gorica heeft geen atrribute "method". Volgens mij zijn pmvnorm de juiste weights?
     PTc <- as.numeric(p - wt_bar[idx] * lq1)
