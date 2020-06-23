@@ -4,7 +4,9 @@
 \name{academic_awards}
 \alias{academic_awards}
 \title{Academic awards data}
-\format{A data frame with 200 rows and 4 variables.}
+\format{
+A data frame with 200 rows and 4 variables.
+}
 \usage{
 data(academic_awards)
 }

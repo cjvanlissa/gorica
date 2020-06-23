@@ -4,7 +4,9 @@
 \name{reading_ach}
 \alias{reading_ach}
 \title{Reading achievement data}
-\format{A data frame with 10320 rows and 5 variables.}
+\format{
+A data frame with 10320 rows and 5 variables.
+}
 \usage{
 data(reading_ach)
 }

@@ -1,14 +1,9 @@
-# Version 0.1.0
+# Version 0.1.1
 
-This is a new submission.
-Addressed comments by Jelena Saf:
-
-* Please shorten the title to a maximum of 65 characters.
-  + The title is now 60 characters
-* Please considerably reduce the check time of your package to stay below the threshold of 10 minutes.
-  + Done; test time on my machine is now 89.57 seconds
-* Please omit the examples from your unexported functions, f.i. ormle().
-  + Done.
+* Bugfix to complement
+* Add warnings if penalty terms are < 0
+* Add warning if user tries to compute complement for more than 1 hypothesis
+* Add Leonard Vanbrabant as contributor
 
 ## Test environments
 * Local Windows 10 (x64 and x32, build 15063), R 3.6.1

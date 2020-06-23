@@ -87,9 +87,9 @@ comp <-
       betasc <- est # was x
     } else if (all(c(constr) == 0L)) {
       # unconstrained setting
-      stop("Restriktor ERROR: no complement exists for the unrestricted hypothesis.")
+      stop("No complement exists for the unrestricted hypothesis.")
     } else {
-      stop("Restriktor ERROR: you might have found a bug, please contact me!")
+      stop("You might have found a bug, please contact the package maintainer.")
     }
 
     # compute free parameters f in the complement

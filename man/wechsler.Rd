@@ -4,7 +4,9 @@
 \name{wechsler}
 \alias{wechsler}
 \title{Wechsler intelligence test data}
-\format{A data frame with 1680 rows and 10 variables.}
+\format{
+A data frame with 1680 rows and 10 variables.
+}
 \usage{
 data(wechsler)
 }

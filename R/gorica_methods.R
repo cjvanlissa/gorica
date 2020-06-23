@@ -22,6 +22,8 @@
 #' @param comparison A character string indicating what the \code{hypothesis}
 #' should be compared to. Defaults to \code{comparison = "unconstrained"};
 #' options include \code{c("unconstrained", "complement", "none")}.
+#' @param iterations Integer. Number of samples to draw from the parameter space
+#' when computing the \code{gorica} penalty.
 #' @param ... Additional arguments passed to the internal function
 #' \code{compare_hypotheses}.
 #'
@@ -112,6 +114,11 @@
 #' \code{estimates}.
 #' \item \code{comparison}  Which alternative hypothesis was used.
 #' \item \code{hypotheses}  The hypotheses evaluated in \code{fit}.
+#' \item \code{relative_weights}  The relative weights of each hypothesis (rows)
+#' versus each other hypothesis in the set (cols). The diagonal is equal to one,
+#' as each hypothesis is equally likely as itself. A value of, e.g., 6, means
+#' that the hypothesis in the row is 6 times more likely than the hypothesis in
+#' the column.
 #' }
 #' @author Caspar van Lissa, Yasin Altinisik, Rebecca Kuiper
 #' @references Altinisik, Y. (2018). Evaluation of Inequality Constrained
@@ -124,7 +131,8 @@
 #'
 #' Kuiper, R. M., Hoijtink, H., & Silvapulle, M. J. (2011).
 #' An Akaike-type information criterion for model selection under inequality
-#' constraints. Biometrika, 98, 495-501. doi:10.1093/biomet/asr002
+#' constraints. Biometrika, 98, 495-501.
+#' \href{https://doi.org/10.1093/biomet/asr002}{doi:10.1093/biomet/asr002}
 #'
 #' Kuiper, R. M., Hoijtink, H., & Silvapulle, M. J. (2012).
 #' Generalization of the order-restricted information criterion for multivariate
@@ -132,10 +140,16 @@
 #' 2454-2463. \href{https://doi.org/10.1016/j.jspi.2012.03.007}{
 #' doi:10.1016/j.jspi.2012.03.007}
 #'
+#' Vanbrabant, L., Van Loey, N., and Kuiper, R.M. (2019).
+#' Evaluating a theory-based hypothesis against its complement using an AIC-type
+#' information criterion with an application to facial burn injury.
+#' Psychological Methods. \href{https://doi.org/10.1037/met0000238}{
+#' doi:10.1037/met0000238}
+#'
 #' McCullagh, P. & Nelder, J. (1989). Generalized linear models (2nd ed.). Boca
 #' Raton, FL: Chapman & Hall / CRC.
 #'
-#' McCullogh, C. E., & Searle, S. R. (2001). Generalized linear and mixed
+#' McCulloch, C. E., & Searle, S. R. (2001). Generalized linear and mixed
 #' models. New York, NY: Wiley.
 #' @examples
 #' \dontshow{
@@ -148,7 +162,7 @@
 #' gorica(aov1,hypothesis="block1=block5;
 #'    K1<0", iterations = 5)
 #'
-#' # EXAMPLE 3. gml
+#' # EXAMPLE 3. glm
 #' counts <- c(18,17,15,20,10,20,25,13,12)
 #' outcome <- gl(3,1,9)
 #' treatment <- gl(3,3)
@@ -173,7 +187,7 @@
 #' gorica(aov1,hypothesis="block1=block5;
 #'    K1<0")
 #'
-#' # EXAMPLE 3. gml
+#' # EXAMPLE 3. glm
 #' counts <- c(18,17,15,20,10,20,25,13,12)
 #' outcome <- gl(3,1,9)
 #' treatment <- gl(3,3)
@@ -193,7 +207,7 @@
 #' @importFrom stats as.formula coef complete.cases cov lm model.frame
 #' model.matrix pt qt sd setNames summary.lm var vcov
 #'
-gorica <- function(x, hypothesis, comparison = "unconstrained", ...) {
+gorica <- function(x, hypothesis, comparison = "unconstrained", iterations = 100000, ...) {
   UseMethod("gorica", x)
 }
 
@@ -202,6 +216,7 @@ gorica <- function(x, hypothesis, comparison = "unconstrained", ...) {
 gorica.default <- function(x,
                            hypothesis,
                            comparison = "unconstrained",
+                           iterations = 100000,
                            Sigma,
                            ...
 )
@@ -278,20 +293,36 @@ gorica.default <- function(x,
                     ))
     hyp <- c(hyp, "Hu")
   }
-  res <- compare_hypotheses(hypotheses, ...)
+  Args_res <- c(
+    list(
+      object = hypotheses,
+      iterations = force(iterations)
+      ),
+    list(...)
+  )
+  res <- do.call(compare_hypotheses, Args_res)
   fit <- res$comparisons
 
   if(comparison == "complement"){
-    use_wtbar <- res[["gorica_penalties"]][[1]][["wt_bar"]]
-    use_wtbar <- use_wtbar[length(use_wtbar) - hypothesis$n_ec[1]]
-    complement <- do.call(comp, c(hypotheses[[1]], wt_bar = use_wtbar))
-    fit <- rbind(fit, complement)
-    hyp <- c(hyp, "Hc")
+    if(length(res[["gorica_penalties"]]) > 1){
+      warning("Cannot compute complement for more than one hypothesis.", call. = FALSE)
+    } else {
+      use_wtbar <- res[["gorica_penalties"]][[1]][["wt_bar"]]
+      use_wtbar <- use_wtbar[length(use_wtbar) - hypothesis$n_ec[1]]
+      complement <- do.call(comp, c(hypotheses[[1]], wt_bar = use_wtbar))
+      fit <- rbind(fit, complement)
+      hyp <- c(hyp, "Hc")
+    }
   }
-
+  if(any(fit$penalty < 0)) warning("Some gorica penalties were below 0. This is not theoretically possible. Please send a bug report to c.j.vanlissa@uu.nl", call. = FALSE)
   fit$gorica_weights <- compute_weights(fit$gorica)
 
   Goricares[c("fit", "hypotheses")] <- list(fit, hyp)
+
+  Goricares$relative_weights <- Goricares$fit$gorica_weights %*% t(1/Goricares$fit$gorica_weights)
+  mat_nams <- hyp
+  mat_nams[!nchar(mat_nams) == 2] <- paste0("H", 1:sum(!nchar(mat_nams) == 2))
+  colnames(Goricares$relative_weights) <- rownames(Goricares$relative_weights) <- mat_nams
   class(Goricares) <- "gorica"
   Goricares
 }
@@ -304,6 +335,7 @@ gorica.htest <-
   function(x,
            hypothesis,
            comparison = "unconstrained",
+           iterations = 100000,
            ...) {
     stop("To be able to run gorica on the results of an object returned by t.test(), you must first load the 'gorica' package, and then conduct your t.test. The standard t.test does not return group-specific variances and sample sizes, which are required by gorica. When you load the gorica package, the standard t.test is replaced by a version that does return this necessary information.")
   }
@@ -314,11 +346,13 @@ gorica.t_test <-
   function(x,
            hypothesis,
            comparison = "unconstrained",
+           iterations = 100000,
            ...) {
     cl <- match.call()
     Args <- as.list(cl[-1])
 
     Args$x <- x$estimate
+    Args$hypothesis <- force(hypothesis)
     #Args$n <- x$n
 
     if(length(x$estimate) == 1){
@@ -353,6 +387,7 @@ gorica.lm <-
   function(x,
            hypothesis,
            comparison = "unconstrained",
+           iterations = 100000,
            ...) {
 
     cl <- match.call()
@@ -364,7 +399,7 @@ gorica.lm <-
     }
     Args$x <- coef(x)
     Args$Sigma <- vcov(x)
-
+    Args$hypothesis <- force(hypothesis)
     Gorica_res <- do.call(gorica, Args)
     Gorica_res$call <- cl
     Gorica_res$model <- x
@@ -382,6 +417,7 @@ gorica.mplus.model <-
   function(x,
            hypothesis,
            comparison = "unconstrained",
+           iterations = 100000,
            ...) {
 
     cl <- match.call()
@@ -389,7 +425,7 @@ gorica.mplus.model <-
     mplus_est <- get_estimates(x)
     Args$x <- mplus_est$estimate
     Args$Sigma <- mplus_est$Sigma
-
+    Args$hypothesis <- force(hypothesis)
     Gorica_res <- do.call(gorica, Args)
     Gorica_res$call <- cl
     Gorica_res$model <- x
@@ -403,11 +439,15 @@ gorica.mplus.model <-
 
 #' @method gorica lavaan
 #' @export
+#' @rdname gorica
+#' @param standardize Logical. For \code{lavaan} objects, whether or not to
+#' extract the standardized model coefficients. Defaults to \code{FALSE}.
 gorica.lavaan <-
   function(x,
            hypothesis,
            comparison = "unconstrained",
            standardize = FALSE,
+           iterations = 100000,
            ...) {
     cl <- match.call()
     Args <- as.list(cl[-1])
@@ -432,6 +472,7 @@ gorica.lmerMod <-
   function(x,
            hypothesis,
            comparison = "unconstrained",
+           iterations = 100000,
            ...) {
 
     cl <- match.call()
@@ -439,7 +480,7 @@ gorica.lmerMod <-
 
     Args$x <- fixef(x)
     Args$Sigma <- vcov(x)
-
+    Args$hypothesis <- force(hypothesis)
     Gorica_res <- do.call(gorica, Args)
     Gorica_res$call <- cl
     Gorica_res$model <- x
@@ -457,6 +498,7 @@ gorica.model_estimates <-
   function(x,
            hypothesis,
            comparison = "unconstrained",
+           iterations = 100000,
            ...) {
 
     cl <- match.call()
@@ -464,7 +506,7 @@ gorica.model_estimates <-
 
     Args$x <- x$estimate
     Args$Sigma <- x$Sigma
-
+    Args$hypothesis <- force(hypothesis)
     Gorica_res <- do.call(gorica, Args)
     Gorica_res$call <- cl
     Gorica_res$model <- x

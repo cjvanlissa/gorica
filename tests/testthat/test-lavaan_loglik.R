@@ -10,4 +10,5 @@ B=~Bb > .6 & B=~Bl > .6 & B=~Bf > .6 & B=~Bn > .6 & B=~Br > .6 & B=~Bc > .6
 "
 set.seed(100)
 out1_c <- gorica(fit1, hypotheses1, comparison = "complement", standardize=FALSE) # TO DO
-expect_equivalent(out1_c$fit[,2], c(8.14, 11.89), tolerance = .001)
+expect_equivalent(out1_c$fit[,2][1], 9.14, tolerance = .01)
+expect_equivalent(out1_c$fit[,2][2], 11.89, tolerance = .5)
