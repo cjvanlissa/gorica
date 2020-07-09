@@ -225,7 +225,7 @@ if (wz==-Inf) stop("The restrictions are solely on the eta parameters that are z
 
 if (ncol(Q)==1) {BKcov=var(Q)}
 if (ncol(Q)!=1) { BKcov=as.matrix(cov(Q[,]))}
-
+# If raw cell probabilities are used, drop the final element from the eta vector and Sigma
 if ( (D==K) & (etax[D]!=0) )
 {
 eta=eta[-c(D)]
@@ -235,7 +235,7 @@ BKcov=as.matrix(BKcov[-c(D),-c(D)])
 if ( (D==K) & (etax[D]==0) )
 {
 
-
+# If the final element is zero, remove the last nonzero element
 eta=eta[-c(wz)]
 BKcov=as.matrix(BKcov[-c(wz),-c(wz)])
 }
@@ -516,9 +516,11 @@ tildeeta[j,]=solveQP$solution
 
 ####Calculating the log likelihoods
 
-if (D==K) {logHm[,j] =as.numeric( ( -(D-1)/2*log(2*pi) )-( 0.5*log(det(BKcov) ) )-( 0.5* t(eta- tildeeta[j,])%*%ginv(BKcov)%*%(eta-tildeeta[j,])) )  }
+  if (D==K) {logHm[,j] =as.numeric( ( -(D-1)/2*log(2*pi) )
+                                    -( 0.5*log(det(BKcov) ) )-( 0.5* t(eta- tildeeta[j,])%*%ginv(BKcov)%*%(eta-tildeeta[j,])) )  }
 
-if (D!=K) {logHm[,j] =as.numeric( ( -K/2*log(2*pi) )-( 0.5*log(det(BKcov) ) )-( 0.5* t(eta- tildeeta[j,])%*%ginv(BKcov)%*%(eta-tildeeta[j,])) )   }
+  if (D!=K) {logHm[,j] =as.numeric( ( -K/2*log(2*pi) )
+                                  -( 0.5*log(det(BKcov) ) )-( 0.5* t(eta- tildeeta[j,])%*%ginv(BKcov)%*%(eta-tildeeta[j,])) )   }
 
 #----------------------------------------------------------------------------------
 
@@ -580,10 +582,10 @@ Weightm=(exp(-0.5*Goricam))/(sum(exp(-0.5*Goricam)))
 ####Some notes are given in the output depending on different situations
 
 
-if ((length(eta)<length(etax))==TRUE & (D!=K)) cat("NOTE: Some of the eta parameters are estimated as zero.\nThe hypotheses under evaluation are rewritten due to empty cell(s).\n \n")
+  if ((length(eta)<length(etax))==TRUE & (D!=K)) cat("NOTE: Some of the eta parameters are estimated as zero.\nThe hypotheses under evaluation are rewritten due to empty cell(s).\n \n")
 
 
-if ((length(eta)<(length(etax)-1))==TRUE & (D==K)) cat("NOTE: Some of the eta parameters are estimated as zero.\nThe hypotheses under evaluation are rewritten due to empty cell(s).\n \n")
+  if ((length(eta)<(length(etax)-1))==TRUE & (D==K)) cat("NOTE: Some of the eta parameters are estimated as zero.\nThe hypotheses under evaluation are rewritten due to empty cell(s).\n \n")
 
 
 ####The rest of the code for writting the output properly on R console

@@ -32,7 +32,6 @@ get_estimates.table <- function(x, ..., margin = NULL, constraints = NULL, nboot
 
   dat_orig <- tab[rep(1:nrow(tab), times = tab$Freq), -which(names(tab) == "Freq")]
 
-browser()
   if(!is.null(margin) & !is.null(constraints)){
     stop("When calling get_estimates.table(), either apply constraints or specify a margin, but not both.")
   }
@@ -58,14 +57,31 @@ browser()
     }))
     the_names <- paste0("x[", apply(tab[-which(names(tab) == "Freq")], 1, paste0, collapse = ","), "]")
   }
+  browser()
+  if(any(is.na(boot_props))) {
+  warning("Some model parameters could not be estimated in some bootstrap sample(s). The number of valid bootstrap samples for the estimates is (also provided in the attribute 'valid_samples' of the estimates):\n")
+    print(colSums(is.na(boot_props)))
+  }
+browser()
+  estimate <- if(nrow(boot_props) > 1){
+    colMeans(boot_props, na.rm = TRUE)
+  } else {
+    mean(boot_props, na.rm = TRUE)
+  }
+  Sigma <- if(nrow(boot_props) > 1){
+    cov(boot_props, use = "complete.obs")
+  } else {
+    cov(t(boot_props), use = "complete.obs")
+  }
 
-  out <- list(estimate = colMeans(boot_props),
-              Sigma = cov(boot_props))
+  out <- list(estimate = estimate,
+              Sigma = Sigma)
 
   names(out$estimate) <- rownames(out$Sigma) <- colnames(out$Sigma) <- the_names
   class(out) <- "model_estimates"
   attr(out, "analysisType") <- "contingency_table"
-  out
+
+  return(out)
 }
 
 

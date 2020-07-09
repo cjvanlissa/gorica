@@ -234,44 +234,12 @@ gorica.default <- function(x,
   if(is.list(Sigma) & length(Sigma) == 1) Sigma <- Sigma[[1]]
   names(x) <- rename_function(names(x))
   colnames(Sigma) <- rownames(Sigma) <- names(x)
-  # Parse hypotheses --------------------------------------------------------
-  #ren_estimate <- rename_estimate(x)
-  if(!inherits(comparison, "character")|length(comparison) > 1){
-    stop("Argument 'comparison' must be an atomic character string.")
-  } else {
-    comp_arg <- pmatch(comparison, c("unconstrained", "complement", "none"))
-    if(is.na(comp_arg)) stop("Argument 'comparison' did not match one of the available options: 'unconstrained', 'complement', or 'none'.")
-    comparison <- c("unconstrained", "complement", "none")[pmatch(comparison, c("unconstrained", "complement", "none"))]
-  }
-  if(inherits(hypothesis, "character")){
-    hypothesis <- rename_function(hypothesis)
-    hyp_params <- params_in_hyp(hypothesis)
-    coef_in_hyp <- sort(unique(charmatch(rename_function(hyp_params),
-                             rename_function(names(x)))))
-    if(anyNA(coef_in_hyp)){
-      stop("Some of the parameters referred to in the 'hypothesis' do not correspond to parameter names of object 'x'.\n  The following parameter names in the 'hypothesis' did not match any parameters in 'x': ",
-           paste(hyp_params[is.na(coef_in_hyp)], collapse = ", "),
-           "\n  The parameters in object 'x' are named: ",
-           paste(names(x), collapse = ", "))
-    }
-    if(any(coef_in_hyp == 0)){
-      stop("Some of the parameters referred to in the 'hypothesis' matched multiple parameter names of object 'x'.\n  The following parameter names in the 'hypothesis' matched multiple parameters in 'x': ",
-           paste(hyp_params[coef_in_hyp == 0], collapse = ", "),
-           "\n  The parameters in object 'x' are named: ",
-           paste(names(x), collapse = ", "))
-    }
-    # Drop parameters not in hypothesis
-    x <- x[coef_in_hyp]
-    Sigma <- Sigma[coef_in_hyp, coef_in_hyp]
+  # Perform housekeeping --------------------------------------------------------
 
-    hypothesis <- parse_hypothesis(names(x), hypothesis)
-  } else {
-    if(inherits(hypothesis, "list") & !is.null(hypothesis[["hyp_mat"]]) & !is.null(hypothesis[["n_ec"]])){
-      hypothesis$original_hypothesis <- matrix_to_hyp(hypothesis, names(x))
-    } else {
-      stop("Argument 'hypothesis' must either be a character string with inequality constraints, or a list with an element 'hyp_mat', consisting of a list of hypothesis matrices, and and element 'n_ec', consisting of an integer vector with the number of equality constraints for each hypothesis matrix in 'hyp_mat'.")
-    }
-  }
+  with_env(gorica_housekeeping)
+
+# Evaluate each hypothesis ------------------------------------------------
+
   hypotheses <- mapply(function(this_hyp, nec_num){
     ormle(x,
           Sigma,
@@ -283,6 +251,8 @@ gorica.default <- function(x,
 
   hyp <- reverse_rename_function(hypothesis$original_hypothesis)
 
+# Add unconstrained hypothesis --------------------------------------------
+
   if(comparison == "unconstrained"){
     hypotheses <- c(hypotheses,
                     list(ormle(est = x,
@@ -293,6 +263,10 @@ gorica.default <- function(x,
                     ))
     hyp <- c(hyp, "Hu")
   }
+
+
+# Add complement ----------------------------------------------------------
+
   Args_res <- c(
     list(
       object = hypotheses,
@@ -314,6 +288,10 @@ gorica.default <- function(x,
       hyp <- c(hyp, "Hc")
     }
   }
+
+
+# Prepare output ----------------------------------------------------------
+
   if(any(fit$penalty < 0)) warning("Some gorica penalties were below 0. This is not theoretically possible. Please send a bug report to c.j.vanlissa@uu.nl", call. = FALSE)
   fit$gorica_weights <- compute_weights(fit$gorica)
 
@@ -524,129 +502,85 @@ gorica.table <- function(x,
                          hypothesis,
                          comparison = "unconstrained",
                          ...){
+  browser()
   cl <- match.call()
   Args <- as.list(cl[-1])
+  original_estimate <- x
 
-  browser()
   # Get constraints from hypothesis
-
+  n_pars <- length(original_estimate)
 
   const <- paste0(get_const(hypothesis), collapse = ";")
+  hypothesis <- rename_table_est(paste0(get_hyp(hypothesis), collapse = ";"))
+  coefs_in_hyp <- params_in_hyp(hypothesis)
   est <- do.call(get_estimates, list(x = force(x),
                                         constraints = const))
-  browser()
-  estimate <- est$estimate
-  colnames(est$Sigma) <- rownames(est$Sigma) <-names(est$estimate) <- rename_table_est(names(estimate))
-  Args$x <- est$estimate
-  Args$Sigma <- est$Sigma
-  Args$hypothesis <- rename_table_est(paste0(get_hyp(hypothesis), collapse = ";"))
+  x <- est$estimate
+  Sigma <- est$Sigma
+
+  names(x) <- rename_table_est(rename_function(names(x)))
+  colnames(Sigma) <- rownames(Sigma) <- names(x)
+  # Perform housekeeping --------------------------------------------------------
+
+  with_env(gorica_housekeeping)
+
+
+# Specific solutions for gorica.table -------------------------------------
+  if(!const == "" & any(x == 1 | x == Inf)) {
+    stop("Some of the defined parameters are invalid (with values equal to 1 or infinity) due to empty cell(s) in the table. Please rewrite the hypotheses.")
+  }
+browser()
+  # if(all(x[coefs_in_hyp] == 0)){
+  #   print(out)
+  #   stop("All estimates referenced in the hypothesis are equal to zero.")
+  # }
+  # Remove null coefficients ------------------------------------------------
+  if(all(Sigma == 0)){
+    stop("All parameter covariances are equal to zero.")
+  }
+  null_coefs <- rowSums(Sigma == 0) == ncol(Sigma)
+  if(any(null_coefs)){
+    browser()
+    #remove_par <- max(which(eta == 0))
+    zero_est <- which(null_coefs)
+    # Discard the rows and thus columns from Sigma for which all elements are zero.
+    # discard the corresponding etas which leads to etaadj
+    # and the corresponding columns from the restriction matrix Rm, which leads to Rmadj
+    with_env(hypothesis_remove, which_par = zero_est)
+    #hyp <- matrix(c(1,0,0,1,2,1), nrow = 2, byrow = T)
+    with_env(hypothesis_adjust)
+  }
+
+  if(!const == ""){
+    if(!is.positive.definite(Sigma)){
+      stop("The defined parameters are linearly dependent on each other. Consequently, their covariance matrix is not positive definite. Please rewrite the hypotheses.")
+    }
+  } else {
+    if(all(names(x) %in% colnames(hypothesis$hyp_mat[[1]]))){
+      message("The hypotheses involve all table cells, which introduces a linear dependency. The final cell probability was defined as one minus the other cell probabilities, and hypotheses were respecified to reflect this.")
+      remove_par <- max(which(x != 0))
+      with_env(hypothesis_remove, which_par = remove_par)
+    }
+  }
+
+
+
+
+
+#if(any())
+  Args$x <- x
+  Args$Sigma <- Sigma
+  Args$hypothesis <- hypothesis
   Args$comparison <- force(comparison)
   Gorica_res <- do.call(gorica, Args)
+  Gorica_res$estimates <- est$estimate
+  Gorica_res$Sigma <- est$Sigma
   Gorica_res$call <- cl
-  Gorica_res$model <- x
+  Gorica_res$model <- original_estimate
+  Gorica_res$hypotheses <- sapply(Gorica_res$hypotheses, reverse_rename_table_est)
 
-  #if(!is.null(Warnings)){
-  #  Gorica_res$Warnings <- Warnings
-  #}
   class(Gorica_res) <- c("gorica_table", class(Gorica_res))
   return(Gorica_res)
-
-  ####The number of cells in the data (for example, for a 2*2*2 contingency table num_cells = 8).
-  num_cells <- length(estimate)
-  ####The number of structural parameters(i.e.,cell probabilities with linear restrictions on cell probabilities
-
-  # Prepare gorica output
-  Goricares <- list(
-    fit = NULL,
-    call = cl,
-    model = x,
-    estimates = x,
-    Sigma = Sigma,
-    comparison = comparison
-  )
-
-  if(!is.null(x$Sigma)) stop("You are computing the gorica for a contingency table, but object 'x' has an element '$Sigma'.")
-
-  # Parse hypotheses --------------------------------------------------------
-  #ren_estimate <- rename_estimate(x)
-  if(!inherits(comparison, "character")|length(comparison) > 1){
-    stop("Argument 'comparison' must be an atomic character string.")
-  } else {
-    comp_arg <- pmatch(comparison, c("unconstrained", "complement", "none"))
-    if(is.na(comp_arg)) stop("Argument 'comparison' did not match one of the available options: 'unconstrained', 'complement', or 'none'.")
-    comparison <- c("unconstrained", "complement", "none")[pmatch(comparison, c("unconstrained", "complement", "none"))]
-  }
-  if(inherits(hypothesis, "character")){
-    hypothesis <- rename_table_est(hypothesis)
-    hypothesis <- gorica:::rename_function(hypothesis)
-    hyp_params <- gorica:::params_in_hyp(hypothesis)
-    coef_in_hyp <- sort(unique(charmatch(hyp_params, names(estimate))))
-    if(anyNA(coef_in_hyp)){
-      stop("Some of the parameters referred to in the 'hypothesis' do not correspond to parameter names of object 'x'.\n  The following parameter names in the 'hypothesis' did not match any parameters in 'x': ",
-           paste(reverse_rename_table_est(gorica:::reverse_rename_function(hyp_params))[is.na(coef_in_hyp)], collapse = ", "),
-           "\n  The parameters in object 'x' are named: ",
-           paste(names(x$estimate), collapse = ", "))
-    }
-    if(any(coef_in_hyp == 0)){
-      stop("Some of the parameters referred to in the 'hypothesis' matched multiple parameter names of object 'x'.\n  The following parameter names in the 'hypothesis' matched multiple parameters in 'x': ",
-           paste(hyp_params[coef_in_hyp == 0], collapse = ", "),
-           "\n  The parameters in object 'x' are named: ",
-           paste(names(x$estimate), collapse = ", "))
-    }
-    # Drop parameters not in hypothesis
-    estimate <- estimate[coef_in_hyp]
-    #Sigma <- Sigma[coef_in_hyp, coef_in_hyp]
-
-    hypothesis <- gorica:::parse_hypothesis(names(estimate), hypothesis)
-  } else {
-    if(inherits(hypothesis, "list") & !is.null(hypothesis[["hyp_mat"]]) & !is.null(hypothesis[["n_ec"]])){
-      hypothesis$original_hypothesis <- matrix_to_hyp(hypothesis, names(x))
-    } else {
-      stop("Argument 'hypothesis' must either be a character string with inequality constraints, or a list with an element 'hyp_mat', consisting of a list of hypothesis matrices, and and element 'n_ec', consisting of an integer vector with the number of equality constraints for each hypothesis matrix in 'hyp_mat'.")
-    }
-  }
-  hypotheses <- mapply(function(this_hyp, nec_num){
-    ormle(x,
-          Sigma,
-          constr = this_hyp[, -ncol(this_hyp), drop = FALSE],
-          nec = nec_num,
-          this_hyp[, ncol(this_hyp)]
-    )
-  }, this_hyp = hypothesis$hyp_mat, nec_num = hypothesis$n_ec, SIMPLIFY = FALSE)
-
-  hyp <- reverse_rename_function(hypothesis$original_hypothesis)
-
-  if(comparison == "unconstrained"){
-    hypotheses <- c(hypotheses,
-                    list(ormle(est = x,
-                               covmtrx = Sigma,
-                               constr = matrix(c(rep(0, length(x))), nrow = 1),
-                               nec = 0,
-                               rhs = 0)
-                    ))
-    hyp <- c(hyp, "Hu")
-  }
-  res <- compare_hypotheses(hypotheses, ...)
-  fit <- res$comparisons
-
-  if(comparison == "complement"){
-    if(length(res[["gorica_penalties"]]) > 1){
-      warning("Cannot compute complement for more than one hypothesis.", call. = FALSE)
-    } else {
-      use_wtbar <- res[["gorica_penalties"]][[1]][["wt_bar"]]
-      use_wtbar <- use_wtbar[length(use_wtbar) - hypothesis$n_ec[1]]
-      complement <- do.call(comp, c(hypotheses[[1]], wt_bar = use_wtbar))
-      fit <- rbind(fit, complement)
-      hyp <- c(hyp, "Hc")
-    }
-  }
-  if(any(fit$penalty < 0)) warning("Some gorica penalties were below 0. This is not theoretically possible. Please send a bug report to c.j.vanlissa@uu.nl", call. = FALSE)
-  fit$gorica_weights <- compute_weights(fit$gorica)
-
-  Goricares[c("fit", "hypotheses")] <- list(fit, hyp)
-  class(Goricares) <- "gorica"
-  Goricares
-
-  # Reverse rename for names(estimate) and hypothesis
-
 }
+
+
