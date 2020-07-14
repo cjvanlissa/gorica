@@ -529,16 +529,51 @@ gorica.table <- function(x,
   if(!const == "" & any(x == 1 | x == Inf)) {
     stop("Some of the defined parameters are invalid (with values equal to 1 or infinity) due to empty cell(s) in the table. Please rewrite the hypotheses.")
   }
+  if(all(Sigma == 0)){
+    stop("All parameter covariances are equal to zero.")
+  }
 browser()
+
+# 1.	Check singular covariance matrix. If so, linear dependency and:
+linear_dependency <- det(Sigma) == 0
+# 2.	Check eta’s without variation.
+null_coefs <- rowSums(Sigma == 0) == ncol(Sigma)
+# If any:
+if(any(null_coefs)){
+  # 3.	Check if this/these eta == 0.
+  if(all(x[null_coefs] == 0)){
+      #       4.	Check sum(remaining eta’s) == 1.
+    if(sum(x[!null_coefs] == 1)){
+      #             * If so, still linear dependency and rewrite hypothesis
+      #               by setting last column of remaing eta’s to 1 – rest; etc.
+    } else {
+      #             * If not, then delete the eta or eta’s
+      #               (and do the check to see if you need to adjust the rhs).
+      zero_est <- which(null_coefs)
+      # Discard the rows and thus columns from Sigma for which all elements are zero.
+      # discard the corresponding etas which leads to etaadj
+      # and the corresponding columns from the restriction matrix Rm, which leads to Rmadj
+      with_env(hypothesis_remove, which_par = zero_est)
+      with_env(hypothesis_adjust)
+    }
+
+
+
+  } else {
+    # If not, then message about rewriting.
+  }
+}
+#
+#
+# I am not sure whether you need to check for 1 (and further again) after 3 or 4.
+
+
   # if(all(x[coefs_in_hyp] == 0)){
   #   print(out)
   #   stop("All estimates referenced in the hypothesis are equal to zero.")
   # }
   # Remove null coefficients ------------------------------------------------
-  if(all(Sigma == 0)){
-    stop("All parameter covariances are equal to zero.")
-  }
-  null_coefs <- rowSums(Sigma == 0) == ncol(Sigma)
+
   if(any(null_coefs)){
     browser()
     #remove_par <- max(which(eta == 0))
@@ -556,7 +591,8 @@ browser()
       stop("The defined parameters are linearly dependent on each other. Consequently, their covariance matrix is not positive definite. Please rewrite the hypotheses.")
     }
   } else {
-    if(all(names(x) %in% colnames(hypothesis$hyp_mat[[1]]))){
+    if((1 - sum(x)) < .0001){ browser()} # Watch out: Maybe bootstrapped estimates do not exactly sum to 1 in the case of linear dependency
+    if(sum(x) == 1){
       message("The hypotheses involve all table cells, which introduces a linear dependency. The final cell probability was defined as one minus the other cell probabilities, and hypotheses were respecified to reflect this.")
       remove_par <- max(which(x != 0))
       with_env(hypothesis_remove, which_par = remove_par)
