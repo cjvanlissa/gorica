@@ -3,6 +3,7 @@
 \name{gorica}
 \alias{gorica}
 \alias{gorica.lavaan}
+\alias{gorica.table}
 \title{Evaluate informative hypotheses using the GORICA}
 \usage{
 gorica(x, hypothesis, comparison = "unconstrained", iterations = 1e+05, ...)
@@ -11,10 +12,12 @@ gorica(x, hypothesis, comparison = "unconstrained", iterations = 1e+05, ...)
   x,
   hypothesis,
   comparison = "unconstrained",
-  standardize = FALSE,
   iterations = 1e+05,
-  ...
+  ...,
+  standardize = FALSE
 )
+
+\method{gorica}{table}(x, hypothesis, comparison = "unconstrained", ...)
 }
 \arguments{
 \item{x}{An R object containing the outcome of a statistical analysis.
@@ -147,6 +150,18 @@ a > 2} do not exist. It is the responsibility of the user to ensure that the
 hypotheses specified are possible. If not, \code{gorica} will either return an
 error message or render an output table containing \code{Inf}'s.
 }
+\section{Contingency tables}{
+
+When specifying hypotheses about contingency tables, the asymptotic
+covariance matrix of the model estimates is derived by means of
+bootstrapping. This makes it possible for users to define derived parameters:
+For example, a ratio between cell probabilities. For this purpose, the
+\code{\link[bain]{bain}} syntax has been enhanced with the command \code{:=}.
+Thus, the syntax \code{"a := x[1,1]/(x[1,1]+x[1,2])"} defines a new parameter
+\code{a} by reference to specific cells of the table \code{x}. This new
+parameter can now be named in hypotheses.
+}
+
 \examples{
 \dontshow{
 # EXAMPLE 1. One-sample t test

@@ -1,0 +1,31 @@
+#D	K	Seed	B	Iterations 
+4	4	113	1000	10000 
+#Parameters used in evalution
+x[1]
+x[2]
+x[3]
+x[4]
+#Number of models to be compared
+3
+#Number of equality and inequality constraints per model
+1 1
+0 2
+0 0
+#Model 1
+#Restriction matrix
+1 -1 0 0   
+0 0 1 -1   
+#Constants
+0 0  
+#Model 2
+#Restriction matrix 
+1 -1 0 0   
+0 0 1 -1 
+#Constants
+0 0 
+#Model unconstrained
+#Restriction matrix 
+0 0 0 0    
+#Constants
+0   
+

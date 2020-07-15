@@ -424,9 +424,9 @@ gorica.lavaan <-
   function(x,
            hypothesis,
            comparison = "unconstrained",
-           standardize = FALSE,
            iterations = 100000,
-           ...) {
+           ...,
+           standardize = FALSE) {
     cl <- match.call()
     Args <- as.list(cl[-1])
     mplus_est <- get_estimates(x, standardize)
@@ -496,13 +496,25 @@ gorica.model_estimates <-
     Gorica_res
   }
 
+
+#' @section Contingency tables:
+#' When specifying hypotheses about contingency tables, the asymptotic
+#' covariance matrix of the model estimates is derived by means of
+#' bootstrapping. This makes it possible for users to define derived parameters:
+#' For example, a ratio between cell probabilities. For this purpose, the
+#' \code{\link[bain]{bain}} syntax has been enhanced with the command \code{:=}.
+#' Thus, the syntax \code{"a := x[1,1]/(x[1,1]+x[1,2])"} defines a new parameter
+#' \code{a} by reference to specific cells of the table \code{x}. This new
+#' parameter can now be named in hypotheses.
+#' @rdname gorica
 #' @method gorica table
 #' @export
+#' @importFrom limSolve ldei
 gorica.table <- function(x,
                          hypothesis,
                          comparison = "unconstrained",
                          ...){
-  browser()
+  #browser()
   cl <- match.call()
   Args <- as.list(cl[-1])
   original_estimate <- x
@@ -528,7 +540,16 @@ gorica.table <- function(x,
   # Perform housekeeping --------------------------------------------------------
 
   with_env(gorica_housekeeping)
-  with_env(drop_empty_hyps)
+  #with_env(drop_empty_hyps)
+  null_hyps <- sapply(hypothesis$hyp_mat, is.null)
+  if(any(null_hyps)){
+    which_null <- which(null_hyps)
+    remove_these <- as.vector(sapply(which_null, seq_tuples, tuples = 2))
+    hypothesis$hyp_mat[which_null] <- NULL
+    hypothesis$n_constraints <- hypothesis$n_constraints[-remove_these]
+    hypothesis$n_ec <- hypothesis$n_ec[-which_null]
+    hypothesis$original_hypothesis <- hypothesis$original_hypothesis[-which_null]
+  }
 
 # Specific solutions for gorica.table -------------------------------------
   if(!const == "" & any(x == 1 | x == Inf)) {
@@ -537,12 +558,11 @@ gorica.table <- function(x,
   if(all(Sigma == 0)){
     stop("All parameter covariances are equal to zero.")
   }
-browser()
 
 # 0. Check if eta's sum to 1
 raw_probs <- sum(x) == 1
 # 1. Check singular covariance matrix. If so, linear dependency and:
-linear_dependency <- !is.positive.definite(Sigma)
+linear_dependency <- !pos_definite(Sigma)
 if(linear_dependency){
   if(!const == ""){
     stop("The defined parameters are linearly dependent on each other. Consequently, their covariance matrix is not positive definite. Please rewrite the hypotheses.")
@@ -567,7 +587,44 @@ if(linear_dependency){
       # discard the corresponding etas which leads to etaadj
       # and the corresponding columns from the restriction matrix Rm, which leads to Rmadj
       # and do the check to see if you need to adjust the rhs (which then gives rhs_adj)
-      with_env(hypothesis_remove_nulls, which_par = zero_est)
+      #with_env(hypothesis_remove_nulls, which_par = zero_est)
+      R <- do.call(rbind, hypothesis$hyp_mat)
+      if(raw_probs){
+        remove_par <- max(which(x != 0))
+        R <- sweep(R, MARGIN = 1, as.vector(R[, remove_par]))
+      }
+      rhs <- R[, ncol(R), drop = FALSE]
+      R <- R[, -ncol(R), drop = FALSE]
+
+      # Delete eta(s) without variation (which are now all 0; which gives eta_adj);
+      x <- x[-zero_est]
+      # delete corresponding rows and columns in Sigma (which gives Sigma_adj)
+      Sigma <- Sigma[-zero_est, -zero_est]
+
+      # and the corresponding columns from the restriction matrix Rm, which leads to Rmadj
+      R_adj <- R[, -zero_est, drop = FALSE]
+
+      # and do the check to see if you need to adjust the rhs (which then gives rhs_adj)
+      null_rows <- which(apply(R_adj, 1, function(i){all(i == 0)}))
+      if(length(null_rows) > 0){
+        if(any(rhs[null_rows] > 0)){
+          qadj <- which(apply(R[null_rows, , drop = FALSE], 2, function(j){any(j != 0)}))
+
+          # Fix below
+          G <- diag(1,ncol(hypothesis$hyp_mat[[1]])-1)[null_rows,]
+          H <- rep(0,length(null_rows))
+          q <- ldei(E=R, F=rhs, G = G, H = H)$X
+          q[qadj] <- 0
+          # Overwrite rhs
+          rhs <- R%*%q
+
+        }
+      }
+      new_hypmat <- cbind(R_adj, rhs)
+      lengths <- c(0, sapply(hypothesis$hyp_mat, nrow))
+      hypothesis$hyp_mat <- lapply(1:length(hypothesis$hyp_mat), function(mat_num){
+        new_hypmat[(sum(lengths[1:mat_num])+1):sum(lengths[1:(mat_num+1)]), ]
+      })
       #with_env(hypothesis_sums_to_one)
 
     }
@@ -577,12 +634,19 @@ if(linear_dependency){
 # Then, check whether there is still linear dependency; i.e., check det(Sigma_adj) == 0.
 # If not, then proceed with eta_adj, Sigma_adj, R_adj, and rhs or rhs_adj.
 # If so, check whether the sum of the (remaining) eta’s (i.e., sum(eta_adj) is 1
-if(!is.positive.definite(Sigma)){
+if(!pos_definite(Sigma)){
   if(sum(x) == 1){
     # If so, rewrite the hypothesis by setting last column of remaining eta’s to 1 – rest; etc; but now using eta_adj, Sigma_adj, R_adj, and rhs or rhs_adj.
     message("The hypotheses involve all table cells, which introduces a linear dependency. The final cell probability was defined as one minus the other cell probabilities, and hypotheses were respecified to reflect this.")
     remove_par <- max(which(x != 0))
-    with_env(hypothesis_sums_to_one, which_par = remove_par)
+    # If hyp sum to one, remove last non-zero par
+    hypothesis$hyp_mat <- lapply(hypothesis$hyp_mat, function(R){
+      sweep(R[, -remove_par, drop = FALSE], MARGIN = 1, as.vector(R[, remove_par]))
+    })
+    # Drop parameters not in hypothesis
+    x <- x[-remove_par]
+    Sigma <- Sigma[-remove_par, -remove_par]
+
   } else {
     # If not, then message about rewriting.
     stop("Please rewrite the hypothesis.")

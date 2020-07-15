@@ -38,6 +38,10 @@ Imports:
     mvtnorm,
     quadprog,
     lme4,
-    lavaan
+    lavaan,
+    limSolve
 Suggests:
-    testthat
+    testthat,
+    FRACTION,
+    matrixcalc,
+    restriktor

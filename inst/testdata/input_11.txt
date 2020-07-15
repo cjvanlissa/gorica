@@ -1,0 +1,32 @@
+#D	K	Seed	B	Iterations 
+4	1	113	1000	10000 
+#Parameters used in evaluation
+(x[1]*x[4])/(x[2]*x[3])
+#Number of models to be compared
+3
+#Number of equality and inequality constraints per model
+0 1
+1 0
+0 1
+#Model 1
+#Restriction matrix (Amat)
+-1
+#Right hand side values (bvec) 
+-1
+#Model 2
+#Restriction matrix (Amat)
+1
+#Right hand side values (bvec) 
+-1
+#Model 3
+#Restriction matrix (Amat)
+1
+#Right hand side values (bvec) 
+-1
+
+
+
+
+
+
+

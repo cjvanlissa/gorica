@@ -57,12 +57,6 @@ get_estimates.table <- function(x, ..., margin = NULL, constraints = NULL, nboot
     }))
     the_names <- paste0("x[", apply(tab[-which(names(tab) == "Freq")], 1, paste0, collapse = ","), "]")
   }
-  browser()
-  if(any(is.na(boot_props))) {
-  warning("Some model parameters could not be estimated in some bootstrap sample(s). The number of valid bootstrap samples for the estimates is (also provided in the attribute 'valid_samples' of the estimates):\n")
-    print(colSums(is.na(boot_props)))
-  }
-browser()
   estimate <- if(nrow(boot_props) > 1){
     colMeans(boot_props, na.rm = TRUE)
   } else {
@@ -72,6 +66,14 @@ browser()
     cov(boot_props, use = "complete.obs")
   } else {
     cov(t(boot_props), use = "complete.obs")
+  }
+
+  empty_prop <- is.na(boot_props)
+  if(any(empty_prop)) {
+    empty_prop <- colSums(empty_prop)
+    names(empty_prop) <- the_names
+    warning("Some model parameters could not be estimated in some bootstrap sample(s). The number of valid bootstrap samples for the estimates is (also provided in the attribute 'valid_samples' of the estimates):\n", paste0(the_names, ": ", empty_prop, collapse = "\n"))
+    attr(estimate, "valid_samples") <- empty_prop
   }
 
   out <- list(estimate = estimate,

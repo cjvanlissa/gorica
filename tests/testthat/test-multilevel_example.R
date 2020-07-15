@@ -89,25 +89,25 @@ Hu <- gorica:::ormle(est = strest, covmtrx = strcovmtrx, constr = constr, nec = 
 
 set.seed(111)
 #Performing gorica to obtain the values of misfit, complexity, GORICA, and GORICA weights
-man_gorica <- gorica:::compare_hypotheses.ormle(H1, H2, H3, Hu, iter = 100)
+man_gorica <- gorica:::compare_hypotheses.ormle(H1, H2, H3, Hu, iter = 1000)
 
 set.seed(111)
-res_gorica <- gorica(model, "zage = 0 & zage + zage:genderMale = 0 & zgevocab > 0 & zage:zgevocab > 0 & zgevocab+zgevocab:genderMale > 0; zage < 0 & zgevocab > 0 & zage:zgevocab > 0 & zage+zage:genderMale < 0&zgevocab+zgevocab:genderMale > 0; zage:zgevocab = 0 & zage > 0 & zgevocab > 0 & zage + zage:genderMale < 0 & zgevocab + zgevocab:genderMale < 0 ", iter = 100)
+res_gorica <- gorica(model, "zage = 0 & zage + zage:genderMale = 0 & zgevocab > 0 & zage:zgevocab > 0 & zgevocab+zgevocab:genderMale > 0; zage < 0 & zgevocab > 0 & zage:zgevocab > 0 & zage+zage:genderMale < 0&zgevocab+zgevocab:genderMale > 0; zage:zgevocab = 0 & zage > 0 & zgevocab > 0 & zage + zage:genderMale < 0 & zgevocab + zgevocab:genderMale < 0 ", iter = 1000)
 
 test_that("Manual and package version yield same loglik", {
   expect_equivalent(man_gorica$comparisons$loglik, res_gorica$fit$loglik)
 })
 
 test_that("Manual and package version yield same penalty", {
-  expect_equivalent(man_gorica$comparisons$penalty, res_gorica$fit$penalty, tolerance = .0001)
+  expect_equivalent(man_gorica$comparisons$penalty, res_gorica$fit$penalty, tolerance = .05)
 })
 
 test_that("Manual and package version yield same gorica", {
-  expect_equivalent(man_gorica$comparisons$gorica, res_gorica$fit$gorica, tolerance = .00001)
+  expect_equivalent(man_gorica$comparisons$gorica, res_gorica$fit$gorica, tolerance = .1)
 })
 
 test_that("Manual and package version yield same weights", {
   expect_equivalent(gorica:::compute_weights(man_gorica$comparisons$gorica),
-                    gorica:::compute_weights(res_gorica$fit$gorica), tolerance = .0001)
+                    gorica:::compute_weights(res_gorica$fit$gorica), tolerance = .01)
 })
 
