@@ -520,10 +520,15 @@ gorica.table <- function(x,
 
   names(x) <- rename_table_est(rename_function(names(x)))
   colnames(Sigma) <- rownames(Sigma) <- names(x)
+
+  # Put x and Sigma in Args already, just to have an unaltered backup
+  Args$x <- x
+  Args$Sigma <- Sigma
+
   # Perform housekeeping --------------------------------------------------------
 
   with_env(gorica_housekeeping)
-
+  with_env(drop_empty_hyps)
 
 # Specific solutions for gorica.table -------------------------------------
   if(!const == "" & any(x == 1 | x == Inf)) {
@@ -534,36 +539,56 @@ gorica.table <- function(x,
   }
 browser()
 
-# 1.	Check singular covariance matrix. If so, linear dependency and:
-linear_dependency <- det(Sigma) == 0
-# 2.	Check eta’s without variation.
-null_coefs <- rowSums(Sigma == 0) == ncol(Sigma)
-# If any:
-if(any(null_coefs)){
-  # 3.	Check if this/these eta == 0.
-  if(all(x[null_coefs] == 0)){
-      #       4.	Check sum(remaining eta’s) == 1.
-    if(sum(x[!null_coefs] == 1)){
-      #             * If so, still linear dependency and rewrite hypothesis
-      #               by setting last column of remaing eta’s to 1 – rest; etc.
+# 0. Check if eta's sum to 1
+raw_probs <- sum(x) == 1
+# 1. Check singular covariance matrix. If so, linear dependency and:
+linear_dependency <- !is.positive.definite(Sigma)
+if(linear_dependency){
+  if(!const == ""){
+    stop("The defined parameters are linearly dependent on each other. Consequently, their covariance matrix is not positive definite. Please rewrite the hypotheses.")
+    }
+  # 2. Check eta’s without variation.
+  null_coefs <- rowSums(Sigma == 0) == ncol(Sigma)
+  # If any:
+  # 3. Check if this/these eta == 0.
+  if(any(null_coefs)){
+    if(any(x[null_coefs] != 0)){ # So, at least one of the eta’s without variation is non-zero
+
+      # If not, then message about rewriting.
+      stop("Please rewrite the hypothesis.")
     } else {
-      #             * If not, then delete the eta or eta’s
-      #               (and do the check to see if you need to adjust the rhs).
+      # If so:
+      # Delete eta(s) without variation (which are now all 0; which gives eta_adj);
+      # delete corresponding rows and columns in Sigma (which gives Sigma_adj)
+      # and corresponding columns in R (R_adj);
       zero_est <- which(null_coefs)
+
       # Discard the rows and thus columns from Sigma for which all elements are zero.
       # discard the corresponding etas which leads to etaadj
       # and the corresponding columns from the restriction matrix Rm, which leads to Rmadj
-      with_env(hypothesis_remove, which_par = zero_est)
-      with_env(hypothesis_adjust)
+      # and do the check to see if you need to adjust the rhs (which then gives rhs_adj)
+      with_env(hypothesis_remove_nulls, which_par = zero_est)
+      #with_env(hypothesis_sums_to_one)
+
     }
-
-
-
-  } else {
-    # If not, then message about rewriting.
   }
 }
-#
+
+# Then, check whether there is still linear dependency; i.e., check det(Sigma_adj) == 0.
+# If not, then proceed with eta_adj, Sigma_adj, R_adj, and rhs or rhs_adj.
+# If so, check whether the sum of the (remaining) eta’s (i.e., sum(eta_adj) is 1
+if(!is.positive.definite(Sigma)){
+  if(sum(x) == 1){
+    # If so, rewrite the hypothesis by setting last column of remaining eta’s to 1 – rest; etc; but now using eta_adj, Sigma_adj, R_adj, and rhs or rhs_adj.
+    message("The hypotheses involve all table cells, which introduces a linear dependency. The final cell probability was defined as one minus the other cell probabilities, and hypotheses were respecified to reflect this.")
+    remove_par <- max(which(x != 0))
+    with_env(hypothesis_sums_to_one, which_par = remove_par)
+  } else {
+    # If not, then message about rewriting.
+    stop("Please rewrite the hypothesis.")
+  }
+}
+
 #
 # I am not sure whether you need to check for 1 (and further again) after 3 or 4.
 
@@ -574,31 +599,29 @@ if(any(null_coefs)){
   # }
   # Remove null coefficients ------------------------------------------------
 
-  if(any(null_coefs)){
-    browser()
-    #remove_par <- max(which(eta == 0))
-    zero_est <- which(null_coefs)
-    # Discard the rows and thus columns from Sigma for which all elements are zero.
-    # discard the corresponding etas which leads to etaadj
-    # and the corresponding columns from the restriction matrix Rm, which leads to Rmadj
-    with_env(hypothesis_remove, which_par = zero_est)
-    #hyp <- matrix(c(1,0,0,1,2,1), nrow = 2, byrow = T)
-    with_env(hypothesis_adjust)
-  }
-
-  if(!const == ""){
-    if(!is.positive.definite(Sigma)){
-      stop("The defined parameters are linearly dependent on each other. Consequently, their covariance matrix is not positive definite. Please rewrite the hypotheses.")
-    }
-  } else {
-    if((1 - sum(x)) < .0001){ browser()} # Watch out: Maybe bootstrapped estimates do not exactly sum to 1 in the case of linear dependency
-    if(sum(x) == 1){
-      message("The hypotheses involve all table cells, which introduces a linear dependency. The final cell probability was defined as one minus the other cell probabilities, and hypotheses were respecified to reflect this.")
-      remove_par <- max(which(x != 0))
-      with_env(hypothesis_remove, which_par = remove_par)
-    }
-  }
-
+  # if(any(null_coefs)){
+  #   browser()
+  #   #remove_par <- max(which(eta == 0))
+  #   zero_est <- which(null_coefs)
+  #   # Discard the rows and thus columns from Sigma for which all elements are zero.
+  #   # discard the corresponding etas which leads to etaadj
+  #   # and the corresponding columns from the restriction matrix Rm, which leads to Rmadj
+  #   with_env(hypothesis_remove_nulls, which_par = zero_est)
+  #   #hyp <- matrix(c(1,0,0,1,2,1), nrow = 2, byrow = T)
+  #   with_env(hypothesis_sums_to_one)
+  # }
+  #
+  # if(!const == ""){
+  #   if(!is.positive.definite(Sigma)){
+  #     stop("The defined parameters are linearly dependent on each other. Consequently, their covariance matrix is not positive definite. Please rewrite the hypotheses.")
+  #   }
+  # } else {
+  #   if((1 - sum(x)) < .0001){ browser()} # Watch out: Maybe bootstrapped estimates do not exactly sum to 1 in the case of linear dependency
+  #   if(sum(x) == 1){
+  #
+  #   }
+  # }
+  #
 
 
 

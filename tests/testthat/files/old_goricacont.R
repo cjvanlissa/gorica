@@ -472,6 +472,7 @@ bvec2=bvec
 }
 
 if (any(bvec[Szxx]>0)) {
+browser()
 
 if (length(Szxx)>1) { qadj=which(apply(Amat[Szxx,], 2, function(y) any(y!=0))) }
 if (length(Szxx)==1) { qadj=which(Amat[Szxx,]!=0)}
