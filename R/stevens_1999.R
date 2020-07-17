@@ -1,7 +1,7 @@
 #' Sesame Street data based on Stevens (1999)
 #'
 #' Synthetic data based Stevens (1999, p. 596). This study
-#' evaluates the effects of the ﬁrst year of the Sesame Street television series
+#' evaluates the effects of the first year of the Sesame Street television series
 #' in a sample of 3-5 years old children in the USA (N = 240).
 #'
 #' \tabular{lll}{
