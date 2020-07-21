@@ -26,10 +26,10 @@ these values by their standard deviations.
 \tabular{lll}{
   \strong{ID} \tab \code{integer} \tab Pupil ID\cr
   \strong{class} \tab \code{integer} \tab Class ID\cr
-  \strong{PE} \tab \code{numeric} \tab Pupil extraversion\cr
+  \strong{PE} \tab \code{numeric} \tab Pupil extraversion, standardized\cr
   \strong{G} \tab \code{factor} \tab Pupil sex\cr
-  \strong{PS} \tab \code{numeric} \tab Popularity scores\cr
-  \strong{TE} \tab \code{integer} \tab Teacher experience
+  \strong{PS} \tab \code{numeric} \tab Popularity scores, standardized\cr
+  \strong{TE} \tab \code{integer} \tab Teacher experience, standardized
 }
 }
 \references{
