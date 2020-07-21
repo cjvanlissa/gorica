@@ -11,17 +11,25 @@ A data frame with 2000 rows and 6 variables.
 data(hox_2010)
 }
 \description{
-Synthetic data based on Hox (2010, p. 16).
+Synthetic data based on Hox (2010, p. 16). In the study, the outcome variable popular
+represents the popularity score of pupils, ranging from 0 (very unpopular) to 10 (very
+popular), for pupils nested in 100 classes of varying size. The popularity scores are
+predicted by pupil level predictors gender (G) and pupil extraversion scores (PE) that
+range from 1 (introversion) to 10 (extraversion), a class-level predictor teacher
+experience (TE), and the cross-level interactions between G and TE as well as PE and TE.
+Since standardization is recommended when the model contains interactions, we standardize
+PS, PE and TE by means of grand mean centering. That is, we first substract the overall
+means of the continuous variables PS, PE, and TE from each of their values, before dividing
+these values by their standard deviations.
 }
 \details{
 \tabular{lll}{
-  \strong{pupil} \tab \code{integer} \tab Pupil ID\cr
-  \strong{school} \tab \code{integer} \tab School ID\cr
-  \strong{popular} \tab \code{numeric} \tab Popularity scores,
-  standardized\cr
-  \strong{sex} \tab \code{factor} \tab Pupil sex\cr
-  \strong{text} \tab \code{numeric} \tab Teacher experience, standardized\cr
-  \strong{teachpop} \tab \code{integer} \tab ??
+  \strong{ID} \tab \code{integer} \tab Pupil ID\cr
+  \strong{class} \tab \code{integer} \tab Class ID\cr
+  \strong{PE} \tab \code{numeric} \tab Pupil extraversion\cr
+  \strong{G} \tab \code{factor} \tab Pupil sex\cr
+  \strong{PS} \tab \code{numeric} \tab Popularity scores\cr
+  \strong{TE} \tab \code{integer} \tab Teacher experience
 }
 }
 \references{
