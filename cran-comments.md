@@ -9,7 +9,10 @@
 ## Test environments
 
 * Local Windows 10 (x64 and x32, build 15063), R 4.1.0
-* rhub::check_for_cran()
+* rhub: Server 2008 R2 SP1, R-devel, 32/64 bit
+* rhub: Fedora Linux, R-devel, clang, gfortran
+* rhub: Ubuntu Linux 20.04.1 LTS, R-release, GCC
+    + PrepError
 * Winbuilder: R version 4.0.5 (2021-03-31)
 * Winbuilder: R version 4.1.1 (2021-08-10)
 * Winbuilder: R Under development (unstable) (2021-09-06 r80861)
