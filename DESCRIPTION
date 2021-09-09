@@ -1,6 +1,6 @@
 Package: gorica
 Type: Package
-Date: 2020-06-08
+Date: 2021-09-09
 Title: Evaluation of Inequality Constrained Hypotheses Using GORICA
 Version: 0.1.1
 Authors@R: c(

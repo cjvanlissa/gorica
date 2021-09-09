@@ -132,19 +132,17 @@
 #' Kuiper, R. M., Hoijtink, H., & Silvapulle, M. J. (2011).
 #' An Akaike-type information criterion for model selection under inequality
 #' constraints. Biometrika, 98, 495-501.
-#' \href{https://doi.org/10.1093/biomet/asr002}{doi:10.1093/biomet/asr002}
+#' <https://academic.oup.com/biomet/article/98/2/495/264032>
 #'
 #' Kuiper, R. M., Hoijtink, H., & Silvapulle, M. J. (2012).
 #' Generalization of the order-restricted information criterion for multivariate
 #' normal linear models. Journal of statistical planning and inference, 142(8),
-#' 2454-2463. \href{https://doi.org/10.1016/j.jspi.2012.03.007}{
-#' doi:10.1016/j.jspi.2012.03.007}
+#' 2454-2463. \doi{10.1016/j.jspi.2012.03.007}
 #'
 #' Vanbrabant, L., Van Loey, N., and Kuiper, R.M. (2019).
 #' Evaluating a theory-based hypothesis against its complement using an AIC-type
 #' information criterion with an application to facial burn injury.
-#' Psychological Methods. \href{https://doi.org/10.1037/met0000238}{
-#' doi:10.1037/met0000238}
+#' Psychological Methods. \doi{10.1037/met0000238}
 #'
 #' McCullagh, P. & Nelder, J. (1989). Generalized linear models (2nd ed.). Boca
 #' Raton, FL: Chapman & Hall / CRC.

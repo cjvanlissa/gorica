@@ -14,10 +14,9 @@ library(gorica)
 ```
 
 
-[![Travis build status](https://travis-ci.org/cjvanlissa/gorica.svg?branch=master)](https://travis-ci.org/cjvanlissa/gorica)
-[![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
-<!--[![CRAN status](https://www.r-pkg.org/badges/version/tidyLPA)](https://cran.r-project.org/package=tidyLPA)-->
-<!--[![](https://cranlogs.r-pkg.org/badges/tidyLPA)](https://cran.r-project.org/package=tidyLPA)-->
+[![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://lifecycle.r-lib.org/articles/stages.html)
+[![CRAN status](https://www.r-pkg.org/badges/version/gorica)](https://cran.r-project.org/package=gorica)
+[![](https://cranlogs.r-pkg.org/badges/gorica)](https://cran.r-project.org/package=gorica)
 
 <!-- [![DOI](http://joss.theoj.org/papers/10.21105/joss.00978/status.svg)](10.1111/bmsp.12110)--> 
 

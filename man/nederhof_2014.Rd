@@ -34,6 +34,6 @@ main effects when interactions exist.
 Nederhof, E., Ormel, J., & Oldehinkel, A. J. (2014).
 Mismatch or cumulative stress: The pathway to depression is conditional on
 attention style. Psychological Science, 25, 684-692.
-[doi:10.1177/0956797613513473](http://dx.doi.org/10.1177/0956797613513473).
+\doi{10.1177/0956797613513473}.
 }
 \keyword{datasets}
