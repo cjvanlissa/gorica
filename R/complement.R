@@ -7,7 +7,6 @@ comp <-
            logLik,
            restrictedest,
            wt_bar) {
-
     if(nec > 0L) {
       constr.ceq <- constr[1:nec, , drop = FALSE]
       rhs.ceq <- rhs[1:nec]

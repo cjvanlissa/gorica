@@ -300,6 +300,7 @@ gorica.default <- function(x,
   Goricares$relative_weights <- Goricares$fit$gorica_weights %*% t(1/Goricares$fit$gorica_weights)
   mat_nams <- hyp
   mat_nams[!nchar(mat_nams) == 2] <- paste0("H", 1:sum(!nchar(mat_nams) == 2))
+  #browser()
   colnames(Goricares$relative_weights) <- rownames(Goricares$relative_weights) <- mat_nams
   class(Goricares) <- "gorica"
   Goricares
@@ -328,8 +329,8 @@ gorica.t_test <-
            ...) {
     cl <- match.call()
     Args <- as.list(cl[-1])
-
-    Args$x <- x$estimate
+    ests <- get_estimates(x)
+    Args$x <- ests$estimate
     Args$hypothesis <- force(hypothesis)
     #Args$n <- x$n
 
