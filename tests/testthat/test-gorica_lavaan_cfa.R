@@ -21,5 +21,5 @@ y <- bain(fit1,hypotheses1,standardize = TRUE)
 y_gor <- gorica(fit1,hypotheses1, standardize = TRUE)
 
 test_that("bain and gorica give similar results", {
-  expect_equivalent(y$fit$PMPb, y_gor$fit$gorica_weights, tolerance = .1)
+  expect_equivalent(y$fit$PMPb[1:2], y_gor$fit$gorica_weights, tolerance = .1)
 })

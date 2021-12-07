@@ -1,4 +1,11 @@
-# Version 0.1.1
+Note that this package was archived from CRAN:
+  "X-CRAN-Comment: Archived on 2021-09-23 as check problems were not
+    corrected in time."
+
+We apologize; we had fixed the check problems locally, but forgot to upload the
+update to CRAN.
+
+# Version 0.1.2
 
 * Fixed gorica.t_test as per Prof. dr. Brian Ripley's notification
 * Bugfix to complement
@@ -9,13 +16,10 @@
 ## Test environments
 
 * Local Windows 10 (x64 and x32, build 15063), R 4.1.0
-* rhub: Server 2008 R2 SP1, R-devel, 32/64 bit
-* rhub: Fedora Linux, R-devel, clang, gfortran
-* rhub: Ubuntu Linux 20.04.1 LTS, R-release, GCC
-    + PrepError
-* Winbuilder: R version 4.0.5 (2021-03-31)
-* Winbuilder: R version 4.1.1 (2021-08-10)
-* Winbuilder: R Under development (unstable) (2021-09-06 r80861)
+* rhub::check_for_cran()
+* devtools::release()
+* devtools::oldrelease()
+* devtools::devel()
 
 ## R CMD check results
 

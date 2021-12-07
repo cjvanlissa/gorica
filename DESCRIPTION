@@ -1,8 +1,8 @@
 Package: gorica
 Type: Package
-Date: 2021-09-09
+Date: 2021-12-07
 Title: Evaluation of Inequality Constrained Hypotheses Using GORICA
-Version: 0.1.1
+Version: 0.1.2
 Authors@R: c(
     person(c("Rebecca M."), "Kuiper", role = "aut"),
     person(c("Altinisik"), "Yasin", role = "aut"),
@@ -28,7 +28,7 @@ Encoding: UTF-8
 LazyData: true
 URL: https://informative-hypotheses.sites.uu.nl/software/goric/
 NeedsCompilation: no
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Depends: 
     R (>= 3.0.0),
     bain (>= 0.2.2),

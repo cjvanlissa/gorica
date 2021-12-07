@@ -1,4 +1,4 @@
-# gorica 0.1.1
+# gorica 0.1.2
 
 * Fixed gorica.t_test as per Prof. dr. Brian Ripley's notification
 * Bugfix to complement
