@@ -236,7 +236,7 @@ gorica.default <- function(x,
 
   with_env(gorica_housekeeping)
 
-# Evaluate each hypothesis ------------------------------------------------
+  # Evaluate each hypothesis ------------------------------------------------
 
   hypotheses <- mapply(function(this_hyp, nec_num){
     ormle(x,
@@ -249,7 +249,7 @@ gorica.default <- function(x,
 
   hyp <- reverse_rename_function(hypothesis$original_hypothesis)
 
-# Add unconstrained hypothesis --------------------------------------------
+  # Add unconstrained hypothesis --------------------------------------------
 
   if(comparison == "unconstrained"){
     hypotheses <- c(hypotheses,
@@ -263,13 +263,13 @@ gorica.default <- function(x,
   }
 
 
-# Add complement ----------------------------------------------------------
+  # Add complement ----------------------------------------------------------
 
   Args_res <- c(
     list(
       object = hypotheses,
       iterations = force(iterations)
-      ),
+    ),
     list(...)
   )
   res <- do.call(compare_hypotheses, Args_res)
@@ -288,7 +288,7 @@ gorica.default <- function(x,
   }
 
 
-# Prepare output ----------------------------------------------------------
+  # Prepare output ----------------------------------------------------------
 
   if(any(fit$penalty < 0)) warning("Some gorica penalties were below 0. This is not theoretically possible. Please send a bug report to c.j.vanlissa@uu.nl", call. = FALSE)
   fit$gorica_weights <- compute_weights(fit$gorica)
@@ -513,7 +513,7 @@ gorica.table <- function(x,
                          hypothesis,
                          comparison = "unconstrained",
                          ...){
-  #browser()
+  browser()
   cl <- match.call()
   Args <- as.list(cl[-1])
   original_estimate <- x
@@ -524,8 +524,11 @@ gorica.table <- function(x,
   const <- paste0(get_const(hypothesis), collapse = ";")
   hypothesis <- rename_table_est(paste0(get_hyp(hypothesis), collapse = ";"))
   coefs_in_hyp <- params_in_hyp(hypothesis)
-  est <- do.call(get_estimates, list(x = force(x),
-                                        constraints = const))
+  cl_est <- cl
+  cl_est <- cl_est[c(1, which(names(cl_est) %in% formalArgs(get_estimates.table)))]
+  cl_est[["constraints"]] <- const
+  cl_est[[1L]] <- quote(get_estimates)
+  est <- eval.parent(cl_est)
   x <- est$estimate
   Sigma <- est$Sigma
 
@@ -550,110 +553,110 @@ gorica.table <- function(x,
     hypothesis$original_hypothesis <- hypothesis$original_hypothesis[-which_null]
   }
 
-# Specific solutions for gorica.table -------------------------------------
+  # Specific solutions for gorica.table -------------------------------------
   if(!const == "" & any(x == 1 | x == Inf)) {
     stop("Some of the defined parameters are invalid (with values equal to 1 or infinity) due to empty cell(s) in the table. Please rewrite the hypotheses.")
   }
   if(all(Sigma == 0)){
     stop("All parameter covariances are equal to zero.")
   }
-
-# 0. Check if eta's sum to 1
-raw_probs <- sum(x) == 1
-# 1. Check singular covariance matrix. If so, linear dependency and:
-linear_dependency <- !pos_definite(Sigma)
-if(linear_dependency){
-  if(!const == ""){
-    stop("The defined parameters are linearly dependent on each other. Consequently, their covariance matrix is not positive definite. Please rewrite the hypotheses.")
+  browser()
+  # 0. Check if eta's sum to 1
+  raw_probs <- sum(x) == 1
+  # 1. Check singular covariance matrix. If so, linear dependency and:
+  linear_dependency <- !pos_definite(Sigma)
+  if(linear_dependency){
+    if(!const == ""){
+      stop("The defined parameters are linearly dependent on each other. Consequently, their covariance matrix is not positive definite. Please rewrite the hypotheses.")
     }
-  # 2. Check eta’s without variation.
-  null_coefs <- rowSums(Sigma == 0) == ncol(Sigma)
-  # If any:
-  # 3. Check if this/these eta == 0.
-  if(any(null_coefs)){
-    if(any(x[null_coefs] != 0)){ # So, at least one of the eta’s without variation is non-zero
+    # 2. Check eta’s without variation.
+    null_coefs <- rowSums(Sigma == 0) == ncol(Sigma)
+    # If any:
+    # 3. Check if this/these eta == 0.
+    if(any(null_coefs)){
+      if(any(x[null_coefs] != 0)){ # So, at least one of the eta’s without variation is non-zero
 
+        # If not, then message about rewriting.
+        stop("Please rewrite the hypothesis.")
+      } else {
+        # If so:
+        # Delete eta(s) without variation (which are now all 0; which gives eta_adj);
+        # delete corresponding rows and columns in Sigma (which gives Sigma_adj)
+        # and corresponding columns in R (R_adj);
+        zero_est <- which(null_coefs)
+
+        # Discard the rows and thus columns from Sigma for which all elements are zero.
+        # discard the corresponding etas which leads to etaadj
+        # and the corresponding columns from the restriction matrix Rm, which leads to Rmadj
+        # and do the check to see if you need to adjust the rhs (which then gives rhs_adj)
+        #with_env(hypothesis_remove_nulls, which_par = zero_est)
+        R <- do.call(rbind, hypothesis$hyp_mat)
+        if(raw_probs){
+          remove_par <- max(which(x != 0))
+          R <- sweep(R, MARGIN = 1, as.vector(R[, remove_par]))
+        }
+        rhs <- R[, ncol(R), drop = FALSE]
+        R <- R[, -ncol(R), drop = FALSE]
+
+        # Delete eta(s) without variation (which are now all 0; which gives eta_adj);
+        x <- x[-zero_est]
+        # delete corresponding rows and columns in Sigma (which gives Sigma_adj)
+        Sigma <- Sigma[-zero_est, -zero_est]
+
+        # and the corresponding columns from the restriction matrix Rm, which leads to Rmadj
+        R_adj <- R[, -zero_est, drop = FALSE]
+
+        # and do the check to see if you need to adjust the rhs (which then gives rhs_adj)
+        null_rows <- which(apply(R_adj, 1, function(i){all(i == 0)}))
+        if(length(null_rows) > 0){
+          if(any(rhs[null_rows] > 0)){
+            qadj <- which(apply(R[null_rows, , drop = FALSE], 2, function(j){any(j != 0)}))
+
+            # Fix below
+            G <- diag(1,ncol(hypothesis$hyp_mat[[1]])-1)[null_rows,]
+            H <- rep(0,length(null_rows))
+            q <- ldei(E=R, F=rhs, G = G, H = H)$X
+            q[qadj] <- 0
+            # Overwrite rhs
+            rhs <- R%*%q
+
+          }
+        }
+        new_hypmat <- cbind(R_adj, rhs)
+        lengths <- c(0, sapply(hypothesis$hyp_mat, nrow))
+        hypothesis$hyp_mat <- lapply(1:length(hypothesis$hyp_mat), function(mat_num){
+          new_hypmat[(sum(lengths[1:mat_num])+1):sum(lengths[1:(mat_num+1)]), ]
+        })
+        #with_env(hypothesis_sums_to_one)
+
+      }
+    }
+  }
+
+  # Then, check whether there is still linear dependency; i.e., check det(Sigma_adj) == 0.
+  # If not, then proceed with eta_adj, Sigma_adj, R_adj, and rhs or rhs_adj.
+  # If so, check whether the sum of the (remaining) eta’s (i.e., sum(eta_adj) is 1
+  if(!pos_definite(Sigma)){
+    if(sum(x) == 1){
+      # If so, rewrite the hypothesis by setting last column of remaining eta’s to 1 – rest; etc; but now using eta_adj, Sigma_adj, R_adj, and rhs or rhs_adj.
+      message("The hypotheses involve all table cells, which introduces a linear dependency. The final cell probability was defined as one minus the other cell probabilities, and hypotheses were respecified to reflect this.")
+      remove_par <- max(which(x != 0))
+      # If hyp sum to one, remove last non-zero par
+      hypothesis$hyp_mat <- lapply(hypothesis$hyp_mat, function(R){
+        sweep(R[, -remove_par, drop = FALSE], MARGIN = 1, as.vector(R[, remove_par]))
+      })
+      # Drop parameters not in hypothesis
+      x <- x[-remove_par]
+      Sigma <- Sigma[-remove_par, -remove_par]
+
+    } else {
       # If not, then message about rewriting.
       stop("Please rewrite the hypothesis.")
-    } else {
-      # If so:
-      # Delete eta(s) without variation (which are now all 0; which gives eta_adj);
-      # delete corresponding rows and columns in Sigma (which gives Sigma_adj)
-      # and corresponding columns in R (R_adj);
-      zero_est <- which(null_coefs)
-
-      # Discard the rows and thus columns from Sigma for which all elements are zero.
-      # discard the corresponding etas which leads to etaadj
-      # and the corresponding columns from the restriction matrix Rm, which leads to Rmadj
-      # and do the check to see if you need to adjust the rhs (which then gives rhs_adj)
-      #with_env(hypothesis_remove_nulls, which_par = zero_est)
-      R <- do.call(rbind, hypothesis$hyp_mat)
-      if(raw_probs){
-        remove_par <- max(which(x != 0))
-        R <- sweep(R, MARGIN = 1, as.vector(R[, remove_par]))
-      }
-      rhs <- R[, ncol(R), drop = FALSE]
-      R <- R[, -ncol(R), drop = FALSE]
-
-      # Delete eta(s) without variation (which are now all 0; which gives eta_adj);
-      x <- x[-zero_est]
-      # delete corresponding rows and columns in Sigma (which gives Sigma_adj)
-      Sigma <- Sigma[-zero_est, -zero_est]
-
-      # and the corresponding columns from the restriction matrix Rm, which leads to Rmadj
-      R_adj <- R[, -zero_est, drop = FALSE]
-
-      # and do the check to see if you need to adjust the rhs (which then gives rhs_adj)
-      null_rows <- which(apply(R_adj, 1, function(i){all(i == 0)}))
-      if(length(null_rows) > 0){
-        if(any(rhs[null_rows] > 0)){
-          qadj <- which(apply(R[null_rows, , drop = FALSE], 2, function(j){any(j != 0)}))
-
-          # Fix below
-          G <- diag(1,ncol(hypothesis$hyp_mat[[1]])-1)[null_rows,]
-          H <- rep(0,length(null_rows))
-          q <- ldei(E=R, F=rhs, G = G, H = H)$X
-          q[qadj] <- 0
-          # Overwrite rhs
-          rhs <- R%*%q
-
-        }
-      }
-      new_hypmat <- cbind(R_adj, rhs)
-      lengths <- c(0, sapply(hypothesis$hyp_mat, nrow))
-      hypothesis$hyp_mat <- lapply(1:length(hypothesis$hyp_mat), function(mat_num){
-        new_hypmat[(sum(lengths[1:mat_num])+1):sum(lengths[1:(mat_num+1)]), ]
-      })
-      #with_env(hypothesis_sums_to_one)
-
     }
   }
-}
 
-# Then, check whether there is still linear dependency; i.e., check det(Sigma_adj) == 0.
-# If not, then proceed with eta_adj, Sigma_adj, R_adj, and rhs or rhs_adj.
-# If so, check whether the sum of the (remaining) eta’s (i.e., sum(eta_adj) is 1
-if(!pos_definite(Sigma)){
-  if(sum(x) == 1){
-    # If so, rewrite the hypothesis by setting last column of remaining eta’s to 1 – rest; etc; but now using eta_adj, Sigma_adj, R_adj, and rhs or rhs_adj.
-    message("The hypotheses involve all table cells, which introduces a linear dependency. The final cell probability was defined as one minus the other cell probabilities, and hypotheses were respecified to reflect this.")
-    remove_par <- max(which(x != 0))
-    # If hyp sum to one, remove last non-zero par
-    hypothesis$hyp_mat <- lapply(hypothesis$hyp_mat, function(R){
-      sweep(R[, -remove_par, drop = FALSE], MARGIN = 1, as.vector(R[, remove_par]))
-    })
-    # Drop parameters not in hypothesis
-    x <- x[-remove_par]
-    Sigma <- Sigma[-remove_par, -remove_par]
-
-  } else {
-    # If not, then message about rewriting.
-    stop("Please rewrite the hypothesis.")
-  }
-}
-
-#
-# I am not sure whether you need to check for 1 (and further again) after 3 or 4.
+  #
+  # I am not sure whether you need to check for 1 (and further again) after 3 or 4.
 
 
   # if(all(x[coefs_in_hyp] == 0)){
@@ -689,7 +692,7 @@ if(!pos_definite(Sigma)){
 
 
 
-#if(any())
+  #if(any())
   Args$x <- x
   Args$Sigma <- Sigma
   Args$hypothesis <- hypothesis

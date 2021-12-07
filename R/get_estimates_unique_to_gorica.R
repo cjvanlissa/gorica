@@ -27,10 +27,15 @@
 #' @export
 #' @method get_estimates table
 get_estimates.table <- function(x, ..., margin = NULL, constraints = NULL, nboot = 1000){
+  browser()
   tab <- as.data.frame.table(x, stringsAsFactors = TRUE,
                              base = list(as.character(1:max(dim(x))))) # Ensure that factor levels correspond to numeric indexes
-
+  tab[-ncol(tab)] <- lapply(tab[-ncol(tab)], function(x){as.integer(factor(x))})
   dat_orig <- tab[rep(1:nrow(tab), times = tab$Freq), -which(names(tab) == "Freq")]
+  dmz <- dim(x)
+  for(i in 1:length(dmz)){
+    dat_orig[[i]] <- ordered(dat_orig[[i]], levels = 1:dmz[i])
+  }
 
   if(!is.null(margin) & !is.null(constraints)){
     stop("When calling get_estimates.table(), either apply constraints or specify a margin, but not both.")
@@ -46,28 +51,25 @@ get_estimates.table <- function(x, ..., margin = NULL, constraints = NULL, nboot
     the_names <- sapply(constraints, `[`, 1)
     constraints <- sapply(constraints, `[`, 2)
     env_const <- new.env()
+    assign("x", prop.table(x), envir = env_const)
+    estimate <- sapply(constraints, function(thisc){ eval(parse(text = thisc), envir = env_const)})
     boot_props <- t(replicate(nboot, {
-      tab_boot <- table(dat_orig[sample(nrow(dat_orig), replace = TRUE), ])
+      tab_boot <- prop.table(table(dat_orig[sample(nrow(dat_orig), replace = TRUE), ]))
       assign("x", tab_boot, envir = env_const)
       eval(parse(text = paste0("c(", paste0(constraints, collapse = ","), ")")), envir = env_const)
     }))
   } else {
+    estimate <- as.vector(prop.table(x))
     boot_props <- t(replicate(nboot, {
       as.vector(prop.table(table(dat_orig[sample(nrow(dat_orig), replace = TRUE), ]), margin = margin))
     }))
     the_names <- paste0("x[", apply(tab[-which(names(tab) == "Freq")], 1, paste0, collapse = ","), "]")
-  }
-  estimate <- if(nrow(boot_props) > 1){
-    colMeans(boot_props, na.rm = TRUE)
-  } else {
-    mean(boot_props, na.rm = TRUE)
   }
   Sigma <- if(nrow(boot_props) > 1){
     cov(boot_props, use = "complete.obs")
   } else {
     cov(t(boot_props), use = "complete.obs")
   }
-
   empty_prop <- is.na(boot_props)
   if(any(empty_prop)) {
     empty_prop <- colSums(empty_prop)
