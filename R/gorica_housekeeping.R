@@ -25,7 +25,7 @@ gorica_housekeeping <- function(){
     }
     # Drop parameters not in hypothesis
     x <- x[coef_in_hyp]
-    Sigma <- Sigma[coef_in_hyp, coef_in_hyp]
+    Sigma <- Sigma[coef_in_hyp, coef_in_hyp, drop = FALSE]
 
     hypothesis <- parse_hypothesis(names(x), hypothesis)
   } else {
