@@ -27,7 +27,6 @@
 #' @export
 #' @method get_estimates table
 get_estimates.table <- function(x, ..., margin = NULL, constraints = NULL, nboot = 1000){
-  browser()
   tab <- as.data.frame.table(x, stringsAsFactors = TRUE,
                              base = list(as.character(1:max(dim(x))))) # Ensure that factor levels correspond to numeric indexes
   tab[-ncol(tab)] <- lapply(tab[-ncol(tab)], function(x){as.integer(factor(x))})
@@ -84,7 +83,6 @@ get_estimates.table <- function(x, ..., margin = NULL, constraints = NULL, nboot
   names(out$estimate) <- rownames(out$Sigma) <- colnames(out$Sigma) <- the_names
   class(out) <- "model_estimates"
   attr(out, "analysisType") <- "contingency_table"
-
   return(out)
 }
 

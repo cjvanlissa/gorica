@@ -10,7 +10,7 @@ tab <- structure(c(933L, 661L, 402L, 260L, 51L, 44L, 26L, 26L), .Dim = c(2L,
 res <- gorica(tab, hypothesis = "a:=x[2,1]/(x[1,1]+x[2,1]);b:=x[2,2]/(x[1,2]+x[2,2]);c:=x[2,3]/(x[1,3]+x[2,3]);d:=x[2,4]/(x[1,4]+x[2,4]);a > (b,c,d); a = b & c > d;a >b & b > c & c > d")
 
 test_that("Estimates close", expect_equivalent(res$estimates, c(0.414845917860363, 0.392453007752678, 0.460725801331216, 0.49971752339389
-), tolerance = .01))
+), tolerance = .03))
 
 test_that("Weights close", expect_equivalent(res$fit$gorica_weights, c(H1 = 0.240105532495478, H2 = 0.416619002783427, H3 = 0.179049636489488,
                                                                        H4 = 0.164225828231607), tolerance = .05))
@@ -24,11 +24,11 @@ tab <- structure(c(5L, 1L, 4L, 1L), .Dim = c(2L, 2L), class = c("table",
 res <- gorica(tab, hypothesis = "x[1,1]=x[1,2] & x[2,1]>x[2,2];x[1,1]>x[1,2] & x[2,1]>x[2,2]")
 
 test_that("Estimates close", expect_equivalent(res$estimates, c(0.449545454545455, 0.0935454545454545, 0.361909090909091, 0.095
-), tolerance = .015))
+), tolerance = .03))
 
 
 test_that("Weights close", expect_equivalent(res$fit$gorica_weights, c(H1 = 0.529853691907202, H2 = 0.344021796389839, H3 = 0.126124511702959
-), tolerance = .01))
+), tolerance = .03))
 
 
 # Example 3 ---------------------------------------------------------------
@@ -38,10 +38,10 @@ tab <- structure(c(5L, 1L, 3L, 0L), .Dim = c(2L, 2L), class = c("table",
 
 res <- gorica(tab, hypothesis = "x[1,1]=x[1,2] & x[2,1]>x[2,2];x[1,1]>x[1,2] & x[2,1]>x[2,2]")
 
-test_that("Estimates close", expect_equivalent(res$estimates, c(0.553555555555556, 0.110111111111111, 0.336333333333333, 0), tolerance = .015))
+test_that("Estimates close", expect_equivalent(res$estimates, c(0.553555555555556, 0.110111111111111, 0.336333333333333, 0), tolerance = .03))
 
 test_that("Weights close", expect_equivalent(res$fit$gorica_weights, c(H1 = 0.484628998773837, H2 = 0.380174392981796, H3 = 0.135196608244367
-), tolerance = .013))
+), tolerance = .03))
 
 
 
@@ -78,10 +78,10 @@ res <- gorica(tab, hypothesis = "x[2,1],x[2,2],x[2,3],x[2,4],x[1,1],x[1,2],x[1,3
 
 test_that("Estimates close", expect_equivalent(res$estimates, c(0.535445464982778, 0, 0.230638920780712, 0.149242824339839,
                                                                 0.029341561423651, 0.0253381171067738, 0.0149196326061998, 0.0150734787600459
-), tolerance = .015))
+), tolerance = .03))
 
 
-test_that("Weights close", expect_equivalent(res$fit$gorica_weights, c(H1 = 0.824030955425743, H2 = 0.175969044574257), tolerance = .01))
+test_that("Weights close", expect_equivalent(res$fit$gorica_weights, c(H1 = 0.824030955425743, H2 = 0.175969044574257), tolerance = .03))
 
 
 # Example 10 ---------------------------------------------------------------

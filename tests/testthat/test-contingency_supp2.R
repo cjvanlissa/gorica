@@ -13,5 +13,5 @@ test_that("contingency table supp 1 works best", {
   expect_equivalent(res$fit$gorica_weights,
                     c(0.5013348, 0.3666024, 0.1320628)
                     ,
-                    tolerance = .01)
+                    tolerance = .03)
 })

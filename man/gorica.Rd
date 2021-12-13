@@ -215,10 +215,10 @@ gor
 }
 }
 \references{
-Altinisik, Y. (2018). Evaluation of Inequality Constrained
-Hypotheses Using an Akaike-Type Information Criterion (Doctoral dissertation,
-Utrecht University). ISBN: 978-90-393-6918-0.
-\url{https://dspace.library.uu.nl/handle/1874/360604}
+Altinisik, Y., Van Lissa, C. J., Hoijtink, H., Oldehinkel, A. J.,
+& Kuiper, R. M. (2021). Evaluation of inequality constrained hypotheses using
+a generalization of the AIC. Psychological Methods, 26(5), 599–621.
+\doi{0.31234/osf.io/t3c8g}.
 
 Bollen, K. (1989). Structural equations with latent variables. New York, NY:
 John Wiley and Sons.
@@ -226,7 +226,7 @@ John Wiley and Sons.
 Kuiper, R. M., Hoijtink, H., & Silvapulle, M. J. (2011).
 An Akaike-type information criterion for model selection under inequality
 constraints. Biometrika, 98, 495-501.
-\url{https://academic.oup.com/biomet/article/98/2/495/264032}
+\doi{10.31219/osf.io/ekxsn}
 
 Kuiper, R. M., Hoijtink, H., & Silvapulle, M. J. (2012).
 Generalization of the order-restricted information criterion for multivariate

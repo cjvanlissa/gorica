@@ -67,7 +67,7 @@ g:=x[14,1]+x[14,2]+x[14,3]+x[14,4]+x[14,5];
 
 h:=x[11,4]+x[12,4]+x[13,4]+x[14,4]+x[15,4];
 
-i:=x[18,1]+x[18,2]+x[18,3]+x[18,4]+x[18,5];
+i:=x[14,1]+x[14,2]+x[14,3]+x[14,4]+x[14,5];
 
 j:=x[16,3]+x[17,3]+x[18,3]+x[19,3]+x[20,3];
 
@@ -83,10 +83,7 @@ a = b & c = d & e = f & k = l;
 
 a = b & c = d & g = h & i = j"
 
-res <- gorica(mydata, hyp)
 
-test_that("contingency table supp 3_1 works", {
-  expect_equivalent(res$fit$gorica_weights,
-                    c(0.1522023526, 0.6953728373, 0.0008049366, 0.000866056, 0.1507538174),
-                    tolerance = .03)
+test_that("contingency table throws error when there are linear deps in defined parameters", {
+  expect_error(gorica(mydata, hyp))
   })

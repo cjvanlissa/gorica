@@ -20,5 +20,5 @@ a>b&b>c&c>d"
 res <- gorica(dat, hyp)
 
 test_that("contingency table supp 1 works best", {
-  expect_equivalent(res$fit$gorica_weights, c(0.2347528, 0.419965, 0.1791582, 0.166124), tolerance = .01)
+  expect_equivalent(res$fit$gorica_weights, c(0.2347528, 0.419965, 0.1791582, 0.166124), tolerance = .03)
 })
