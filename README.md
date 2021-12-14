@@ -1,11 +1,10 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-[![Travis build
-status](https://travis-ci.org/cjvanlissa/gorica.svg?branch=master)](https://travis-ci.org/cjvanlissa/gorica)
-[![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
-<!--[![CRAN status](https://www.r-pkg.org/badges/version/tidyLPA)](https://cran.r-project.org/package=tidyLPA)-->
-<!--[![](https://cranlogs.r-pkg.org/badges/tidyLPA)](https://cran.r-project.org/package=tidyLPA)-->
+[![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://lifecycle.r-lib.org/articles/stages.html)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/gorica)](https://cran.r-project.org/package=gorica)
+[![](https://cranlogs.r-pkg.org/badges/gorica)](https://cran.r-project.org/package=gorica)
 
 <!-- [![DOI](http://joss.theoj.org/papers/10.21105/joss.00978/status.svg)](10.1111/bmsp.12110)-->
 
@@ -33,7 +32,7 @@ devtools::install_github("cjvanlissa/gorica")
 ## Workflow
 
 Add gorica to your existing R workflow, and evaluate informative
-hypotheses for your familiar R analyses\! Here is an example for testing
+hypotheses for your familiar R analyses! Here is an example for testing
 an informative hypothesis about mean differences in an ANOVA:
 
 ``` r
@@ -42,8 +41,8 @@ gorica(res, "Speciessetosa < Speciesversicolor = Speciesvirginica; Speciessetosa
 #> Informative hypothesis test for an object of class lm:
 #> 
 #>    loglik  penalty gorica gorica_weights
-#> H1 -14.948 1.499   32.894 0.000         
-#> H2 5.103   1.834   -6.538 0.762         
+#> H1 -14.948 1.501   32.898 0.000         
+#> H2 5.103   1.836   -6.534 0.762         
 #> Hu 5.103   3.000   -4.206 0.238         
 #> 
 #> Hypotheses:

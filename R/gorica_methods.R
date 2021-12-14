@@ -121,10 +121,10 @@
 #' the column.
 #' }
 #' @author Caspar van Lissa, Yasin Altinisik, Rebecca Kuiper
-#' @references Altinisik, Y. (2018). Evaluation of Inequality Constrained
-#' Hypotheses Using an Akaike-Type Information Criterion (Doctoral dissertation,
-#' Utrecht University). ISBN: 978-90-393-6918-0.
-#' \url{https://dspace.library.uu.nl/handle/1874/360604}
+#' @references Altinisik, Y., Van Lissa, C. J., Hoijtink, H., Oldehinkel, A. J.,
+#' & Kuiper, R. M. (2021). Evaluation of inequality constrained hypotheses using
+#' a generalization of the AIC. Psychological Methods, 26(5), 599–621.
+#' \doi{0.31234/osf.io/t3c8g}.
 #'
 #' Bollen, K. (1989). Structural equations with latent variables. New York, NY:
 #' John Wiley and Sons.
@@ -132,19 +132,17 @@
 #' Kuiper, R. M., Hoijtink, H., & Silvapulle, M. J. (2011).
 #' An Akaike-type information criterion for model selection under inequality
 #' constraints. Biometrika, 98, 495-501.
-#' \href{https://doi.org/10.1093/biomet/asr002}{doi:10.1093/biomet/asr002}
+#' \doi{10.31219/osf.io/ekxsn}
 #'
 #' Kuiper, R. M., Hoijtink, H., & Silvapulle, M. J. (2012).
 #' Generalization of the order-restricted information criterion for multivariate
 #' normal linear models. Journal of statistical planning and inference, 142(8),
-#' 2454-2463. \href{https://doi.org/10.1016/j.jspi.2012.03.007}{
-#' doi:10.1016/j.jspi.2012.03.007}
+#' 2454-2463. \doi{10.1016/j.jspi.2012.03.007}
 #'
 #' Vanbrabant, L., Van Loey, N., and Kuiper, R.M. (2019).
 #' Evaluating a theory-based hypothesis against its complement using an AIC-type
 #' information criterion with an application to facial burn injury.
-#' Psychological Methods. \href{https://doi.org/10.1037/met0000238}{
-#' doi:10.1037/met0000238}
+#' Psychological Methods. \samp{doi:10.1037/met0000238}
 #'
 #' McCullagh, P. & Nelder, J. (1989). Generalized linear models (2nd ed.). Boca
 #' Raton, FL: Chapman & Hall / CRC.
@@ -221,6 +219,8 @@ gorica.default <- function(x,
                            ...
 )
 {
+  #browser()
+  # Check for analysisType == "contingency_tables"hier, en ga naar gorica.table indien dat het geval is
   cl <- match.call()
   Goricares <- list(
     fit = NULL,
@@ -234,44 +234,11 @@ gorica.default <- function(x,
   if(is.list(Sigma) & length(Sigma) == 1) Sigma <- Sigma[[1]]
   names(x) <- rename_function(names(x))
   colnames(Sigma) <- rownames(Sigma) <- names(x)
-  # Parse hypotheses --------------------------------------------------------
-  #ren_estimate <- rename_estimate(x)
-  if(!inherits(comparison, "character")|length(comparison) > 1){
-    stop("Argument 'comparison' must be an atomic character string.")
-  } else {
-    comp_arg <- pmatch(comparison, c("unconstrained", "complement", "none"))
-    if(is.na(comp_arg)) stop("Argument 'comparison' did not match one of the available options: 'unconstrained', 'complement', or 'none'.")
-    comparison <- c("unconstrained", "complement", "none")[pmatch(comparison, c("unconstrained", "complement", "none"))]
-  }
-  if(inherits(hypothesis, "character")){
-    hypothesis <- rename_function(hypothesis)
-    hyp_params <- params_in_hyp(hypothesis)
-    coef_in_hyp <- sort(unique(charmatch(rename_function(hyp_params),
-                             rename_function(names(x)))))
-    if(anyNA(coef_in_hyp)){
-      stop("Some of the parameters referred to in the 'hypothesis' do not correspond to parameter names of object 'x'.\n  The following parameter names in the 'hypothesis' did not match any parameters in 'x': ",
-           paste(hyp_params[is.na(coef_in_hyp)], collapse = ", "),
-           "\n  The parameters in object 'x' are named: ",
-           paste(names(x), collapse = ", "))
-    }
-    if(any(coef_in_hyp == 0)){
-      stop("Some of the parameters referred to in the 'hypothesis' matched multiple parameter names of object 'x'.\n  The following parameter names in the 'hypothesis' matched multiple parameters in 'x': ",
-           paste(hyp_params[coef_in_hyp == 0], collapse = ", "),
-           "\n  The parameters in object 'x' are named: ",
-           paste(names(x), collapse = ", "))
-    }
-    # Drop parameters not in hypothesis
-    x <- x[coef_in_hyp]
-    Sigma <- Sigma[coef_in_hyp, coef_in_hyp]
+  # Perform housekeeping --------------------------------------------------------
+  with_env(gorica_housekeeping)
 
-    hypothesis <- parse_hypothesis(names(x), hypothesis)
-  } else {
-    if(inherits(hypothesis, "list") & !is.null(hypothesis[["hyp_mat"]]) & !is.null(hypothesis[["n_ec"]])){
-      hypothesis$original_hypothesis <- matrix_to_hyp(hypothesis, names(x))
-    } else {
-      stop("Argument 'hypothesis' must either be a character string with inequality constraints, or a list with an element 'hyp_mat', consisting of a list of hypothesis matrices, and and element 'n_ec', consisting of an integer vector with the number of equality constraints for each hypothesis matrix in 'hyp_mat'.")
-    }
-  }
+  # Evaluate each hypothesis ------------------------------------------------
+
   hypotheses <- mapply(function(this_hyp, nec_num){
     ormle(x,
           Sigma,
@@ -283,6 +250,8 @@ gorica.default <- function(x,
 
   hyp <- reverse_rename_function(hypothesis$original_hypothesis)
 
+  # Add unconstrained hypothesis --------------------------------------------
+
   if(comparison == "unconstrained"){
     hypotheses <- c(hypotheses,
                     list(ormle(est = x,
@@ -293,11 +262,15 @@ gorica.default <- function(x,
                     ))
     hyp <- c(hyp, "Hu")
   }
+
+
+  # Add complement ----------------------------------------------------------
+
   Args_res <- c(
     list(
       object = hypotheses,
       iterations = force(iterations)
-      ),
+    ),
     list(...)
   )
   res <- do.call(compare_hypotheses, Args_res)
@@ -314,6 +287,10 @@ gorica.default <- function(x,
       hyp <- c(hyp, "Hc")
     }
   }
+
+
+  # Prepare output ----------------------------------------------------------
+
   if(any(fit$penalty < 0)) warning("Some gorica penalties were below 0. This is not theoretically possible. Please send a bug report to c.j.vanlissa@uu.nl", call. = FALSE)
   fit$gorica_weights <- compute_weights(fit$gorica)
 
@@ -350,8 +327,8 @@ gorica.t_test <-
            ...) {
     cl <- match.call()
     Args <- as.list(cl[-1])
-
-    Args$x <- x$estimate
+    ests <- get_estimates(x)
+    Args$x <- ests$estimate
     Args$hypothesis <- force(hypothesis)
     #Args$n <- x$n
 
@@ -446,9 +423,9 @@ gorica.lavaan <-
   function(x,
            hypothesis,
            comparison = "unconstrained",
-           standardize = FALSE,
            iterations = 100000,
-           ...) {
+           ...,
+           standardize = FALSE) {
     cl <- match.call()
     Args <- as.list(cl[-1])
     mplus_est <- get_estimates(x, standardize)
@@ -517,4 +494,181 @@ gorica.model_estimates <-
     class(Gorica_res) <- c("gorica_model_estimates", class(Gorica_res))
     Gorica_res
   }
+
+
+#' @section Contingency tables:
+#' When specifying hypotheses about contingency tables, the asymptotic
+#' covariance matrix of the model estimates is derived by means of
+#' bootstrapping. This makes it possible for users to define derived parameters:
+#' For example, a ratio between cell probabilities. For this purpose, the
+#' \code{\link[bain]{bain}} syntax has been enhanced with the command \code{:=}.
+#' Thus, the syntax \code{"a := x[1,1]/(x[1,1]+x[1,2])"} defines a new parameter
+#' \code{a} by reference to specific cells of the table \code{x}. This new
+#' parameter can now be named in hypotheses.
+#' @rdname gorica
+#' @method gorica table
+#' @export
+#' @importFrom limSolve ldei
+#' @importFrom methods formalArgs
+gorica.table <- function(x,
+                         hypothesis,
+                         comparison = "unconstrained",
+                         ...){
+  cl <- match.call()
+  Args <- as.list(cl[-1])
+  original_estimate <- x
+
+  # Get constraints from hypothesis
+  n_pars <- length(original_estimate)
+
+  const <- paste0(get_const(hypothesis), collapse = ";")
+  hasconstraints <- isFALSE(const == "")
+  hypothesis <- rename_table_est(paste0(get_hyp(hypothesis), collapse = ";"))
+  coefs_in_hyp <- params_in_hyp(hypothesis)
+  cl_est <- cl
+  cl_est <- cl_est[c(1, which(names(cl_est) %in% formalArgs(get_estimates.table)))]
+  cl_est[["constraints"]] <- const
+  cl_est[[1L]] <- quote(get_estimates)
+  est <- eval.parent(cl_est)
+  x <- est$estimate
+  Sigma <- est$Sigma
+
+  names(x) <- rename_table_est(rename_function(names(x)))
+  colnames(Sigma) <- rownames(Sigma) <- names(x)
+
+  # Put x and Sigma in Args already, just to have an unaltered backup
+  Args$x <- x
+  Args$Sigma <- Sigma
+
+  # Perform housekeeping --------------------------------------------------------
+  with_env(gorica_housekeeping)
+  null_hyps <- sapply(hypothesis$hyp_mat, is.null)
+  if(any(null_hyps)){
+    which_null <- which(null_hyps)
+    remove_these <- as.vector(sapply(which_null, seq_tuples, tuples = 2))
+    hypothesis$hyp_mat[which_null] <- NULL
+    hypothesis$n_constraints <- hypothesis$n_constraints[-remove_these]
+    hypothesis$n_ec <- hypothesis$n_ec[-which_null]
+    hypothesis$original_hypothesis <- hypothesis$original_hypothesis[-which_null]
+  }
+
+  if(hasconstraints & any(original_estimate == 0) & any(x == 1 | x == Inf)) {
+    stop("Some of the defined parameters are invalid (with values equal to 1 or infinity) due to empty cell(s) in the table. Please rewrite the hypotheses.")
+  }
+  if(all(Sigma == 0)){
+    stop("All parameter covariances are equal to zero.")
+  }
+
+  # Establish whether the constraints are specified on raw probabilities
+  raw_probs <- sum(x) == 1
+  # 1. Check if the covariance matrix is singular. If so, linear dependency and:
+  linear_dependency <- !pos_definite(Sigma)
+  if(linear_dependency){
+    # 2. Check eta’s without variation.
+    null_coefs <- rowSums(Sigma == 0) == ncol(Sigma)
+    # If any:
+    # 3. Check if this/these eta == 0.
+    if(any(null_coefs)){
+      if(any(x[null_coefs] != 0)){ # So, at least one of the eta’s without variation is non-zero
+        # If not, then message about rewriting.
+        stop("Please rewrite the hypothesis.")
+      } else {
+        # If so:
+        # Delete eta(s) without variation (which are now all 0; which gives eta_adj);
+        # delete corresponding rows and columns in Sigma (which gives Sigma_adj)
+        # and corresponding columns in R (R_adj);
+        zero_est <- which(null_coefs)
+
+        # Discard the rows and thus columns from Sigma for which all elements are zero.
+        # discard the corresponding etas which leads to etaadj
+        # and the corresponding columns from the restriction matrix Rm, which leads to Rmadj
+        # and do the check to see if you need to adjust the rhs (which then gives rhs_adj)
+        #with_env(hypothesis_remove_nulls, which_par = zero_est)
+        R <- do.call(rbind, hypothesis$hyp_mat)
+        if(raw_probs){
+          remove_par <- max(which(x != 0))
+          R <- sweep(R, MARGIN = 1, as.vector(R[, remove_par]))
+        }
+        rhs <- R[, ncol(R), drop = FALSE]
+        R <- R[, -ncol(R), drop = FALSE]
+
+        # Delete eta(s) without variation (which are now all 0; which gives eta_adj);
+        x <- x[-zero_est]
+        # delete corresponding rows and columns in Sigma (which gives Sigma_adj)
+        Sigma <- Sigma[-zero_est, -zero_est]
+
+        # and the corresponding columns from the restriction matrix Rm, which leads to Rmadj
+        R_adj <- R[, -zero_est, drop = FALSE]
+
+        # and do the check to see if you need to adjust the rhs (which then gives rhs_adj)
+        null_rows <- which(apply(R_adj, 1, function(i){all(i == 0)}))
+        if(length(null_rows) > 0){
+          if(any(rhs[null_rows] > 0)){
+            qadj <- which(apply(R[null_rows, , drop = FALSE], 2, function(j){any(j != 0)}))
+            G <- diag(1,ncol(hypothesis$hyp_mat[[1]])-1)[null_rows,]
+            H <- rep(0,length(null_rows))
+            q <- ldei(E=R, F=rhs, G = G, H = H)$X
+            q[qadj] <- 0
+            rhs <- R%*%q
+
+          }
+        }
+        new_hypmat <- cbind(R_adj, rhs)
+        lengths <- c(0, sapply(hypothesis$hyp_mat, nrow))
+        hypothesis$hyp_mat <- lapply(1:length(hypothesis$hyp_mat), function(mat_num){
+          new_hypmat[(sum(lengths[1:mat_num])+1):sum(lengths[1:(mat_num+1)]), ]
+        })
+      }
+    }
+  }
+
+  # Then, check whether there is still linear dependency; i.e., check det(Sigma_adj) == 0.
+  # If not, then proceed with eta_adj, Sigma_adj, R_adj, and rhs or rhs_adj.
+  # If so, check whether the sum of the (remaining) eta’s (i.e., sum(eta_adj) is 1
+  if(!pos_definite(Sigma)){
+    if(raw_probs){
+      # If the hypothesis is specified on raw probabilities, it is possible to
+      # rewrite the hypothesis by setting last column of remaining eta’s to
+      # 1 – rest; etc; but now using eta_adj, Sigma_adj, R_adj, and rhs or rhs_adj.
+      message("The hypotheses involve all table cells, which introduces a linear dependency. The final cell probability was defined as one minus the other cell probabilities, and hypotheses were respecified to reflect this.")
+      remove_par <- max(which(x != 0))
+      # If hyp sum to one, remove last non-zero par
+      hypothesis$hyp_mat <- lapply(hypothesis$hyp_mat, function(R){
+        sweep(R[, -remove_par, drop = FALSE], MARGIN = 1, as.vector(R[, remove_par]))
+      })
+      # Drop parameters not in hypothesis
+      x <- x[-remove_par]
+      Sigma <- Sigma[-remove_par, -remove_par]
+      if(!pos_definite(Sigma)){
+        stop("The covariance matrix is still not positive definite. Please rewrite the hypotheses.")
+      }
+    } else {
+      stop("The defined parameters contain linear dependencies. Consequently, their covariance matrix is not positive definite. Please rewrite the hypotheses.")
+    }
+  }
+
+  #
+  # I am not sure whether you need to check for 1 (and further again) after 3 or 4.
+
+
+  # if(all(x[coefs_in_hyp] == 0)){
+  #   print(out)
+  #   stop("All x referenced in the hypothesis are equal to zero.")
+  # }
+
+  Args$x <- x
+  Args$Sigma <- Sigma
+  Args$hypothesis <- hypothesis
+  Args$comparison <- force(comparison)
+  Gorica_res <- do.call(gorica, Args)
+  Gorica_res$estimates <- est$estimate
+  Gorica_res$Sigma <- est$Sigma
+  Gorica_res$call <- cl
+  Gorica_res$model <- original_estimate
+  Gorica_res$hypotheses <- sapply(Gorica_res$hypotheses, reverse_rename_table_est)
+
+  class(Gorica_res) <- c("gorica_table", class(Gorica_res))
+  return(Gorica_res)
+}
+
 

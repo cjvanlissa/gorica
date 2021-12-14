@@ -1,0 +1,22 @@
+#D	K	Seed	B	Iterations 
+8	3	113	1000	10000 
+#Parameters used in evaluation (eta)
+(x[1]*x[6])/(x[2]*x[5])
+(x[2]*x[7])/(x[3]*x[6])
+(x[3]*x[8])/(x[4]*x[7])
+#Number of models to be compared
+2
+#Number of equality and inequality constraints per model
+0 3
+0 0
+#Model 1
+#Restriction matrix
+1 -1 0  
+0 1 -1
+#Constants
+0 0 
+#Model unconstrained
+#Restriction matrix 
+0 0 0    
+#Constants
+0 

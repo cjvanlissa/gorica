@@ -3,6 +3,7 @@
 \name{gorica}
 \alias{gorica}
 \alias{gorica.lavaan}
+\alias{gorica.table}
 \title{Evaluate informative hypotheses using the GORICA}
 \usage{
 gorica(x, hypothesis, comparison = "unconstrained", iterations = 1e+05, ...)
@@ -11,10 +12,12 @@ gorica(x, hypothesis, comparison = "unconstrained", iterations = 1e+05, ...)
   x,
   hypothesis,
   comparison = "unconstrained",
-  standardize = FALSE,
   iterations = 1e+05,
-  ...
+  ...,
+  standardize = FALSE
 )
+
+\method{gorica}{table}(x, hypothesis, comparison = "unconstrained", ...)
 }
 \arguments{
 \item{x}{An R object containing the outcome of a statistical analysis.
@@ -147,6 +150,18 @@ a > 2} do not exist. It is the responsibility of the user to ensure that the
 hypotheses specified are possible. If not, \code{gorica} will either return an
 error message or render an output table containing \code{Inf}'s.
 }
+\section{Contingency tables}{
+
+When specifying hypotheses about contingency tables, the asymptotic
+covariance matrix of the model estimates is derived by means of
+bootstrapping. This makes it possible for users to define derived parameters:
+For example, a ratio between cell probabilities. For this purpose, the
+\code{\link[bain]{bain}} syntax has been enhanced with the command \code{:=}.
+Thus, the syntax \code{"a := x[1,1]/(x[1,1]+x[1,2])"} defines a new parameter
+\code{a} by reference to specific cells of the table \code{x}. This new
+parameter can now be named in hypotheses.
+}
+
 \examples{
 \dontshow{
 # EXAMPLE 1. One-sample t test
@@ -200,10 +215,10 @@ gor
 }
 }
 \references{
-Altinisik, Y. (2018). Evaluation of Inequality Constrained
-Hypotheses Using an Akaike-Type Information Criterion (Doctoral dissertation,
-Utrecht University). ISBN: 978-90-393-6918-0.
-\url{https://dspace.library.uu.nl/handle/1874/360604}
+Altinisik, Y., Van Lissa, C. J., Hoijtink, H., Oldehinkel, A. J.,
+& Kuiper, R. M. (2021). Evaluation of inequality constrained hypotheses using
+a generalization of the AIC. Psychological Methods, 26(5), 599–621.
+\doi{0.31234/osf.io/t3c8g}.
 
 Bollen, K. (1989). Structural equations with latent variables. New York, NY:
 John Wiley and Sons.
@@ -211,19 +226,17 @@ John Wiley and Sons.
 Kuiper, R. M., Hoijtink, H., & Silvapulle, M. J. (2011).
 An Akaike-type information criterion for model selection under inequality
 constraints. Biometrika, 98, 495-501.
-\href{https://doi.org/10.1093/biomet/asr002}{doi:10.1093/biomet/asr002}
+\doi{10.31219/osf.io/ekxsn}
 
 Kuiper, R. M., Hoijtink, H., & Silvapulle, M. J. (2012).
 Generalization of the order-restricted information criterion for multivariate
 normal linear models. Journal of statistical planning and inference, 142(8),
-2454-2463. \href{https://doi.org/10.1016/j.jspi.2012.03.007}{
-doi:10.1016/j.jspi.2012.03.007}
+2454-2463. \doi{10.1016/j.jspi.2012.03.007}
 
 Vanbrabant, L., Van Loey, N., and Kuiper, R.M. (2019).
 Evaluating a theory-based hypothesis against its complement using an AIC-type
 information criterion with an application to facial burn injury.
-Psychological Methods. \href{https://doi.org/10.1037/met0000238}{
-doi:10.1037/met0000238}
+Psychological Methods. \samp{doi:10.1037/met0000238}
 
 McCullagh, P. & Nelder, J. (1989). Generalized linear models (2nd ed.). Boca
 Raton, FL: Chapman & Hall / CRC.
