@@ -236,7 +236,7 @@ normal linear models. Journal of statistical planning and inference, 142(8),
 Vanbrabant, L., Van Loey, N., and Kuiper, R.M. (2019).
 Evaluating a theory-based hypothesis against its complement using an AIC-type
 information criterion with an application to facial burn injury.
-Psychological Methods. \samp{doi:10.1037/met0000238}
+Psychological Methods. \doi{10.31234/osf.io/n6ydv}
 
 McCullagh, P. & Nelder, J. (1989). Generalized linear models (2nd ed.). Boca
 Raton, FL: Chapman & Hall / CRC.

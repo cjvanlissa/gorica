@@ -142,7 +142,7 @@
 #' Vanbrabant, L., Van Loey, N., and Kuiper, R.M. (2019).
 #' Evaluating a theory-based hypothesis against its complement using an AIC-type
 #' information criterion with an application to facial burn injury.
-#' Psychological Methods. \samp{doi:10.1037/met0000238}
+#' Psychological Methods. \doi{10.31234/osf.io/n6ydv}
 #'
 #' McCullagh, P. & Nelder, J. (1989). Generalized linear models (2nd ed.). Boca
 #' Raton, FL: Chapman & Hall / CRC.
@@ -287,8 +287,6 @@ gorica.default <- function(x,
       hyp <- c(hyp, "Hc")
     }
   }
-
-
   # Prepare output ----------------------------------------------------------
 
   if(any(fit$penalty < 0)) warning("Some gorica penalties were below 0. This is not theoretically possible. Please send a bug report to c.j.vanlissa@uu.nl", call. = FALSE)
@@ -300,6 +298,9 @@ gorica.default <- function(x,
   mat_nams <- hyp
   mat_nams[!nchar(mat_nams) == 2] <- paste0("H", 1:sum(!nchar(mat_nams) == 2))
   colnames(Goricares$relative_weights) <- rownames(Goricares$relative_weights) <- mat_nams
+  restest <- t(sapply(hypotheses, `[[`, "restrictedest"))
+  rownames(restest) <- mat_nams[1:nrow(restest)]
+  Goricares$restricted_estimates <- restest
   class(Goricares) <- "gorica"
   Goricares
 }
@@ -520,7 +521,6 @@ gorica.table <- function(x,
 
   # Get constraints from hypothesis
   n_pars <- length(original_estimate)
-
   const <- paste0(get_const(hypothesis), collapse = ";")
   hasconstraints <- isFALSE(const == "")
   hypothesis <- rename_table_est(paste0(get_hyp(hypothesis), collapse = ";"))
