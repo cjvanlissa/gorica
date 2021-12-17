@@ -535,11 +535,10 @@ gorica.table <- function(x,
 
   names(x) <- rename_table_est(rename_function(names(x)))
   colnames(Sigma) <- rownames(Sigma) <- names(x)
-
+#browser()
   # Put x and Sigma in Args already, just to have an unaltered backup
   Args$x <- x
   Args$Sigma <- Sigma
-
   # Perform housekeeping --------------------------------------------------------
   with_env(gorica_housekeeping)
   null_hyps <- sapply(hypothesis$hyp_mat, is.null)
@@ -552,15 +551,18 @@ gorica.table <- function(x,
     hypothesis$original_hypothesis <- hypothesis$original_hypothesis[-which_null]
   }
 
-  if(hasconstraints & any(original_estimate == 0) & any(x == 1 | x == Inf)) {
-    stop("Some of the defined parameters are invalid (with values equal to 1 or infinity) due to empty cell(s) in the table. Please rewrite the hypotheses.")
+  if(hasconstraints & (any(original_estimate == 0) & any(x == 1 | x == Inf)) | any(is.nan(Sigma))) {
+    stop("Some of the defined parameters are invalid due to empty cell(s) in the table. Please rewrite the hypotheses.")
   }
   if(all(Sigma == 0)){
     stop("All parameter covariances are equal to zero.")
   }
 
   # Establish whether the constraints are specified on raw probabilities
-  raw_probs <- sum(x) == 1
+  sum_to_one <- sum(x) == 1
+  if(sum_to_one & hasconstraints){
+    stop("The defined parameters contain linear dependencies. Consequently, their covariance matrix is not positive definite. Please rewrite the hypotheses.")
+  }
   # 1. Check if the covariance matrix is singular. If so, linear dependency and:
   linear_dependency <- !pos_definite(Sigma)
   if(linear_dependency){
@@ -585,7 +587,7 @@ gorica.table <- function(x,
         # and do the check to see if you need to adjust the rhs (which then gives rhs_adj)
         #with_env(hypothesis_remove_nulls, which_par = zero_est)
         R <- do.call(rbind, hypothesis$hyp_mat)
-        if(raw_probs){
+        if(sum_to_one){
           remove_par <- max(which(x != 0))
           R <- sweep(R, MARGIN = 1, as.vector(R[, remove_par]))
         }
@@ -626,7 +628,7 @@ gorica.table <- function(x,
   # If not, then proceed with eta_adj, Sigma_adj, R_adj, and rhs or rhs_adj.
   # If so, check whether the sum of the (remaining) eta’s (i.e., sum(eta_adj) is 1
   if(!pos_definite(Sigma)){
-    if(raw_probs){
+    if(!hasconstraints){
       # If the hypothesis is specified on raw probabilities, it is possible to
       # rewrite the hypothesis by setting last column of remaining eta’s to
       # 1 – rest; etc; but now using eta_adj, Sigma_adj, R_adj, and rhs or rhs_adj.
@@ -638,7 +640,7 @@ gorica.table <- function(x,
       })
       # Drop parameters not in hypothesis
       x <- x[-remove_par]
-      Sigma <- Sigma[-remove_par, -remove_par]
+      Sigma <- Sigma[-remove_par, -remove_par, drop = FALSE]
       if(!pos_definite(Sigma)){
         stop("The covariance matrix is still not positive definite. Please rewrite the hypotheses.")
       }
