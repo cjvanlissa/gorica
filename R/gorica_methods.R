@@ -124,7 +124,7 @@
 #' @references Altinisik, Y., Van Lissa, C. J., Hoijtink, H., Oldehinkel, A. J.,
 #' & Kuiper, R. M. (2021). Evaluation of inequality constrained hypotheses using
 #' a generalization of the AIC. Psychological Methods, 26(5), 599–621.
-#' \doi{0.31234/osf.io/t3c8g}.
+#' \doi{10.31234/osf.io/t3c8g}.
 #'
 #' Bollen, K. (1989). Structural equations with latent variables. New York, NY:
 #' John Wiley and Sons.
@@ -219,7 +219,6 @@ gorica.default <- function(x,
                            ...
 )
 {
-  #browser()
   # Check for analysisType == "contingency_tables"hier, en ga naar gorica.table indien dat het geval is
   cl <- match.call()
   Goricares <- list(
@@ -535,7 +534,6 @@ gorica.table <- function(x,
 
   names(x) <- rename_table_est(rename_function(names(x)))
   colnames(Sigma) <- rownames(Sigma) <- names(x)
-#browser()
   # Put x and Sigma in Args already, just to have an unaltered backup
   Args$x <- x
   Args$Sigma <- Sigma
@@ -657,7 +655,6 @@ gorica.table <- function(x,
   #   print(out)
   #   stop("All x referenced in the hypothesis are equal to zero.")
   # }
-
   Args$x <- x
   Args$Sigma <- Sigma
   Args$hypothesis <- hypothesis

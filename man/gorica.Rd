@@ -218,7 +218,7 @@ gor
 Altinisik, Y., Van Lissa, C. J., Hoijtink, H., Oldehinkel, A. J.,
 & Kuiper, R. M. (2021). Evaluation of inequality constrained hypotheses using
 a generalization of the AIC. Psychological Methods, 26(5), 599–621.
-\doi{0.31234/osf.io/t3c8g}.
+\doi{10.31234/osf.io/t3c8g}.
 
 Bollen, K. (1989). Structural equations with latent variables. New York, NY:
 John Wiley and Sons.

@@ -15,9 +15,9 @@ Description: Implements the generalized order-restricted information criterion
     utilized to evaluate informative hypotheses specifying directional
     relationships between model parameters in terms of (in)equality
     constraints (see Altinisik, Van Lissa, Hoijtink, Oldehinkel, & Kuiper,
-    2021), <doi:0.31234/osf.io/t3c8g>. The GORICA is applicable not only to normal
-    linear models, but also to generalized linear models (GLMs), generalized
-    linear mixed models (GLMMs), structural equation models
+    2021), <doi:10.31234/osf.io/t3c8g>. The GORICA is applicable not only to
+    normal linear models, but also to generalized linear models (GLMs), 
+    generalized linear mixed models (GLMMs), structural equation models
     (SEMs), and contingency tables. For contingency tables, restrictions on cell
     probabilities can be non-linear.
 License: GPL (>= 3)

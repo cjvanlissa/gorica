@@ -15,7 +15,6 @@ compare_hypotheses.ormle <-
     gorica_penalties <- lapply(orlmlist, function(x) gorica_penalty(x, iterations = iterations))
     loglik <- sapply(orlmlist, function(x) x$logLik)
     penalty <- sapply(gorica_penalties, `[[`, "penalty")
-    #browser()
     gor <- -2*loglik + 2*penalty
     list(comparisons = data.frame(loglik = loglik,
                penalty = penalty,
@@ -38,7 +37,6 @@ gorica_penalty <-
     if(any(object$constr != 0) | object$nec != 0){
 
       Z <- rmvnorm(n = iterations, mean = rep(0, K), sigma = object$covmtrx)
-      #browser()
       ginvcovm <- ginv(object$covmtrx)
       Dmat2 = 2*ginvcovm
 
