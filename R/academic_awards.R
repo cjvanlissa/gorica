@@ -16,5 +16,8 @@
 #' @keywords datasets
 #' @name academic_awards
 #' @usage data(academic_awards)
+#' @references Introduction to SAS. UCLA: Statistical Consulting Group. from
+#' https://stats.oarc.ucla.edu/sas/modules/introduction-to-the-features-of-sas/
+#' (accessed August 22, 2021).
 #' @format A data frame with 200 rows and 4 variables.
 NULL

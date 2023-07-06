@@ -4,7 +4,7 @@
 summary.gorica <- function(object, ci = .95, ...){
   # Fix this in gorica; make sure that it always returns a matrix, even if
   # posterior is only one number
-  if(class(object$posterior) == "numeric") object$posterior <- as.matrix(object$posterior)
+  if(inherits(object$posterior, what = "numeric")) object$posterior <- as.matrix(object$posterior)
   data.frame(
     Parameter = names(object$estimates),
     n = object$n,

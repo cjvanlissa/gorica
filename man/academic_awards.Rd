@@ -25,4 +25,9 @@ awards earned by students at a high school in a year \cr
   "General", "Academic", or "Vocational".
 }
 }
+\references{
+Introduction to SAS. UCLA: Statistical Consulting Group. from
+https://stats.oarc.ucla.edu/sas/modules/introduction-to-the-features-of-sas/
+(accessed August 22, 2021).
+}
 \keyword{datasets}
