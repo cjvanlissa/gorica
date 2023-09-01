@@ -4,8 +4,8 @@
 [![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 [![CRAN
 status](https://www.r-pkg.org/badges/version/gorica)](https://cran.r-project.org/package=gorica)
-[![](https://cranlogs.r-pkg.org/badges/gorica)](https://cran.r-project.org/package=gorica)
-
+[![downloads](https://cranlogs.r-pkg.org/badges/gorica)](https://cran.r-project.org/package=gorica)
+[![R-CMD-check](https://github.com/cjvanlissa/gorica/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/cjvanlissa/gorica/actions/workflows/R-CMD-check.yaml)
 <!-- [![DOI](http://joss.theoj.org/papers/10.21105/joss.00978/status.svg)](10.1111/bmsp.12110)-->
 
 # GORICA: Evaluation of Inequality Constrained Hypotheses Using Generalized AIC
@@ -41,8 +41,8 @@ gorica(res, "Speciessetosa < Speciesversicolor = Speciesvirginica; Speciessetosa
 #> Informative hypothesis test for an object of class lm:
 #> 
 #>    loglik  penalty gorica gorica_weights
-#> H1 -14.948 1.501   32.898 0.000         
-#> H2 5.103   1.836   -6.534 0.762         
+#> H1 -14.948 1.500   32.897 0.000         
+#> H2 5.103   1.834   -6.539 0.762         
 #> Hu 5.103   3.000   -4.206 0.238         
 #> 
 #> Hypotheses:
