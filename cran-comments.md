@@ -1,26 +1,27 @@
-Note that this package was archived from CRAN:
-  "X-CRAN-Comment: Archived on 2021-09-23 as check problems were not
-    corrected in time."
+# gorica 0.1.3
 
-We apologize; we had fixed the check problems locally, but forgot to upload the
-update to CRAN.
+* Update maintainer email address
+* Add datasets for examples in Psychological Methods paper
+* Add gorica.table() method
 
-# Version 0.1.2
-
-* Fixed gorica.t_test as per Prof. dr. Brian Ripley's notification
-* Bugfix to complement
-* Add warnings if penalty terms are < 0
-* Add warning if user tries to compute complement for more than 1 hypothesis
-* Add Leonard Vanbrabant as contributor
 
 ## Test environments
 
-* Local Windows 10 (x64 and x32, build 15063), R 4.1.0
+* Local Windows 10 x64 (build 19045), R 4.3.0
 * rhub::check_for_cran()
 * devtools::release()
 * devtools::oldrelease()
 * devtools::devel()
+* GitHub Actions check-release
 
 ## R CMD check results
 
-OK
+1 NOTE:
+
+Maintainer: 'Caspar J. van Lissa <c.j.vanlissa@tilburguniversity.edu>
+
+New submission
+
+Package was archived on CRAN
+
+Response: Apologies, I thought I had updated my email address with the previous update.

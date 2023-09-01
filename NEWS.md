@@ -1,3 +1,9 @@
+# gorica 0.1.3
+
+* Update maintainer email address
+* Add datasets for examples in Psychological Methods paper
+* Add gorica.table() method
+
 # gorica 0.1.2
 
 * Fixed gorica.t_test as per Prof. dr. Brian Ripley's notification

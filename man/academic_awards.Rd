@@ -11,8 +11,7 @@ A data frame with 200 rows and 4 variables.
 data(academic_awards)
 }
 \description{
-Simulated dataset from
-\url{https://stats.idre.ucla.edu/sas/dae/poisson-regression/}.
+Simulated dataset based on the UCLA Statistical Consulting Group's website.
 }
 \details{
 \tabular{lll}{
