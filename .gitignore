@@ -10,3 +10,4 @@ binary/
 .dll
 dev/
 docs
+*.txt

@@ -40,5 +40,4 @@ Imports:
 Suggests:
     testthat,
     FRACTION,
-    matrixcalc,
-    restriktor
+    matrixcalc

@@ -2,6 +2,7 @@
 ^\.Rproj\.user$
 ^README\.Rmd$
 ^README-.*\.png$
+^.*\.txt$
 ^\.travis\.yml$
 binary/
 dev

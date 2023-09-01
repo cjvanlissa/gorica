@@ -1,7 +1,6 @@
 #' Academic awards data
 #'
-#' Simulated dataset from
-#' \url{https://stats.idre.ucla.edu/sas/dae/poisson-regression/}.
+#' Simulated dataset based on the UCLA Statistical Consulting Group's website.
 #'
 #' \tabular{lll}{
 #'   \strong{num_awards} \tab \code{integer} \tab Outcome variable; indicates the number of
