@@ -389,6 +389,7 @@ gorica.lm <-
   }
 
 #' @method gorica mplus.model
+#' @export
 #' @keywords internal
 gorica.mplus.model <-
   function(x,
