@@ -1,3 +1,7 @@
+# gorica 0.1.4
+
+* Only change is to fix warning in CRAN Package Check Results
+
 # gorica 0.1.3
 
 * Update maintainer email address
