@@ -13,8 +13,8 @@ data("wechsler")
 
 #Specification of the variables and the model
 SEM.model <- '
-Cry = ~ y1 + y2 + y3 + y4
-Fld = ~ y2 + y3 + y5 + y6 + y7 + y8
+Cry =~ y1 + y2 + y3 + y4
+Fld =~ y2 + y3 + y5 + y6 + y7 + y8
 Cry ~ edc + age
 Fld ~ edc + age
 '
