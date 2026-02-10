@@ -3,6 +3,8 @@ compare_hypotheses <-
     UseMethod("compare_hypotheses")
   }
 
+#' @method compare_hypotheses ormle
+#' @export
 compare_hypotheses.ormle <-
   function(object, ..., iterations = 100000){
     if (iterations < 1) stop("No of iterations < 1")
@@ -23,6 +25,8 @@ compare_hypotheses.ormle <-
     )
   }
 
+#' @method compare_hypotheses list
+#' @export
 compare_hypotheses.list <- function(object, ..., iterations = 100000){
   if (all(sapply(object, class) == "ormle")) out <- compare_hypotheses.ormle(object, iterations = iterations)
   return(out)

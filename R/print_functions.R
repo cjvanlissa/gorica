@@ -32,6 +32,8 @@ print.gorica <- function(x,
 }
 
 
+#' @method print ormle
+#' @export
 print.ormle <- function(x, digits = max(3, getOption("digits") - 3), ...){
   cat("\n$est\n")
   print(x$est)
