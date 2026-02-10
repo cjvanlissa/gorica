@@ -1,5 +1,6 @@
 # gorica 0.1.5
 
+* Package was archived because one of its dependencies was temporarily archived
 * Changed lavaan syntax from `= ~` to `=~` to account for new parser
 
 # gorica 0.1.4
